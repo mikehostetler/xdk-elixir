@@ -12,12 +12,13 @@ defmodule Xdk.Errors do
     ],
     unknown_error: Xdk.Errors.UnknownError
 
-  @type error ::
-          Xdk.Errors.ApiError.t()
-          | Xdk.Errors.RateLimitError.t()
-          | Xdk.Errors.TransportError.t()
-          | Xdk.Errors.DecodeError.t()
-          | Xdk.Errors.UnknownError.t()
+  @typedoc """
+  Any error returned by the XDK client.
+
+  One of `Xdk.Errors.ApiError`, `Xdk.Errors.RateLimitError`,
+  `Xdk.Errors.TransportError`, or `Xdk.Errors.DecodeError`.
+  """
+  @type error :: Exception.t()
 end
 
 defmodule Xdk.Errors.Api do

@@ -3,7 +3,12 @@
 # Any manual changes will be overwritten on the next generation.
 
 defmodule Xdk.Streaming do
-  @moduledoc false
+  @moduledoc """
+  Low-level NDJSON streaming helper for the X API.
+
+  Used internally by `Xdk.Stream` to consume newline-delimited JSON
+  streams (filtered stream, sample stream, etc.).
+  """
 
   @spec ndjson_stream(Xdk.t(), atom(), String.t(), keyword()) :: Enumerable.t()
   def ndjson_stream(%Xdk{} = client, method, path, opts \\ []) do
