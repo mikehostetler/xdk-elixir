@@ -4,13 +4,27 @@
 defmodule Xdk.MixProject do
   use Mix.Project
 
+  @version "1.0.0"
+  @source_url "https://github.com/mikehostetler/xdk-elixir"
+  @description "Auto-generated Elixir client for the X (Twitter) API v2"
+
   def project do
     [
-      app: :xdk,
-      version: "0.1.0",
+      app: :xdk_elixir,
+      version: @version,
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases(),
+      dialyzer: dialyzer(),
+
+      # Hex
+      name: "XDK",
+      description: @description,
+      source_url: @source_url,
+      homepage_url: @source_url,
+      package: package(),
+      docs: docs()
     ]
   end
 
@@ -26,8 +40,54 @@ defmodule Xdk.MixProject do
       {:jason, "~> 1.4"},
       {:splode, "~> 0.2"},
       {:oauther, "~> 1.3"},
+
+      # Dev/Test
       {:bypass, "~> 2.1", only: :test},
-      {:dotenvy, "~> 0.8", only: [:dev, :test]}
+      {:dotenvy, "~> 0.8", only: [:dev, :test]},
+      {:ex_doc, "~> 0.31", only: :dev, runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+    ]
+  end
+
+  defp aliases do
+    [
+      quality: [
+        "compile --warnings-as-errors",
+        "format --check-formatted",
+        "credo --strict",
+        "dialyzer"
+      ]
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+      plt_add_apps: [:mix],
+      ignore_warnings: ".dialyzer_ignore.exs"
+    ]
+  end
+
+  defp package do
+    [
+      name: "xdk_elixir",
+      licenses: ["Apache-2.0"],
+      links: %{
+        "GitHub" => @source_url,
+        "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md",
+        "Generator" => "https://github.com/mikehostetler/xdk"
+      },
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md)
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md", "CHANGELOG.md", "LICENSE"],
+      source_ref: "v#{@version}",
+      source_url: @source_url
     ]
   end
 end

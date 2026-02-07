@@ -36,9 +36,7 @@ defmodule Xdk.Integration.AppOnlyTest do
       user_id = lookup["data"]["id"]
 
       assert {:ok, resp} =
-               Xdk.Users.get_by_id(client, user_id,
-                 user_fields: ["id", "name", "username"]
-               )
+               Xdk.Users.get_by_id(client, user_id, user_fields: ["id", "name", "username"])
 
       assert resp["data"]["id"] == user_id
     end
@@ -149,9 +147,7 @@ defmodule Xdk.Integration.AppOnlyTest do
       tweet_id = hd(search["data"])["id"]
 
       assert {:ok, resp} =
-               Xdk.Posts.get_by_id(client, tweet_id,
-                 tweet_fields: ["id", "text", "author_id"]
-               )
+               Xdk.Posts.get_by_id(client, tweet_id, tweet_fields: ["id", "text", "author_id"])
 
       assert resp["data"]["id"] == tweet_id
     end

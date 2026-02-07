@@ -33,7 +33,14 @@ defmodule Xdk.Integration.UserContextTest do
     test "returns expanded fields", %{client: client} do
       assert {:ok, resp} =
                Xdk.Users.get_me(client,
-                 user_fields: ["id", "name", "username", "public_metrics", "description", "profile_image_url"]
+                 user_fields: [
+                   "id",
+                   "name",
+                   "username",
+                   "public_metrics",
+                   "description",
+                   "profile_image_url"
+                 ]
                )
 
       data = resp["data"]
