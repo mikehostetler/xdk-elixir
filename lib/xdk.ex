@@ -18,7 +18,8 @@ defmodule Xdk do
     :request_opts
   ]
 
-  @type auth :: nil | {:bearer, String.t()} | {:oauth2, map()}
+  @type auth ::
+          nil | {:bearer, String.t()} | {:oauth2, map()} | {:oauth1, OAuther.Credentials.t()}
 
   @type t :: %__MODULE__{
           base_url: String.t(),
@@ -77,7 +78,7 @@ defmodule Xdk do
         _ -> url <> "?" <> Xdk.Query.encode(query)
       end
 
-    headers = build_headers(client, opts)
+    headers = build_headers(client, method, url, opts)
 
     {encoded_body, headers} =
       cond do
@@ -141,7 +142,7 @@ defmodule Xdk do
         _ -> url <> "?" <> Xdk.Query.encode(query)
       end
 
-    headers = build_headers(client, opts)
+    headers = build_headers(client, method, url, opts)
 
     Finch.build(method, url, headers)
   end
@@ -165,18 +166,37 @@ defmodule Xdk do
     end
   end
 
-  defp build_headers(%__MODULE__{} = client, opts) do
+  defp build_headers(%__MODULE__{} = client, method, url, opts) do
     per_request_auth = Keyword.get(opts, :auth, client.auth)
 
     [{"user-agent", "xdk-elixir/#{@version}"}]
     |> Kernel.++(client.headers)
     |> Kernel.++(Keyword.get(opts, :headers, []))
-    |> Kernel.++(auth_headers(per_request_auth))
+    |> Kernel.++(auth_headers(per_request_auth, method, url))
   end
 
-  defp auth_headers(nil), do: []
-  defp auth_headers({:bearer, token}), do: [{"authorization", "Bearer #{token}"}]
-  defp auth_headers({:oauth2, %{access_token: token}}), do: [{"authorization", "Bearer #{token}"}]
+  defp auth_headers(nil, _method, _url), do: []
+  defp auth_headers({:bearer, token}, _method, _url), do: [{"authorization", "Bearer #{token}"}]
+
+  defp auth_headers({:oauth2, %{access_token: token}}, _method, _url),
+    do: [{"authorization", "Bearer #{token}"}]
+
+  defp auth_headers({:oauth1, credentials}, method, url) do
+    {uri, query_string} =
+      case String.split(url, "?", parts: 2) do
+        [base] -> {base, ""}
+        [base, qs] -> {base, qs}
+      end
+
+    query_params =
+      query_string
+      |> URI.decode_query()
+      |> Enum.to_list()
+
+    signed_params = OAuther.sign(to_string(method), uri, query_params, credentials)
+    {header, _params} = OAuther.header(signed_params)
+    [header]
+  end
 
   defp handle_response({:ok, %Finch.Response{status: 429, headers: headers, body: body}}) do
     decoded = try_decode_body(body, headers)
