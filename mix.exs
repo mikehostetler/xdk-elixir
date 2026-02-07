@@ -25,7 +25,8 @@ defmodule Xdk.MixProject do
       {:finch, "~> 0.19"},
       {:jason, "~> 1.4"},
       {:splode, "~> 0.2"},
-      {:bypass, "~> 2.1", only: :test}
+      {:bypass, "~> 2.1", only: :test},
+      {:dotenvy, "~> 0.8", only: [:dev, :test]}
     ]
   end
 end
