@@ -3,6 +3,7 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.UsageTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
@@ -12,6 +13,35 @@ defmodule Xdk.UsageTest do
     test "get function exists" do
       Code.ensure_loaded!(Xdk.Usage)
       assert function_exported?(Xdk.Usage, :get, 1) or function_exported?(Xdk.Usage, :get, 2)
+    end
+  end
+
+  describe "get/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/usage/tweets", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Usage.get(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/usage/tweets", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Usage.get(client)
     end
   end
 end

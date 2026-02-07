@@ -3,73 +3,11 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.StreamTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Stream)
-    end
-
-    test "posts_firehose_ja function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :posts_firehose_ja, 1) or
-               function_exported?(Xdk.Stream, :posts_firehose_ja, 2)
-    end
-
-    test "likes_firehose function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :likes_firehose, 1) or
-               function_exported?(Xdk.Stream, :likes_firehose, 2)
-    end
-
-    test "posts function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :posts, 1) or
-               function_exported?(Xdk.Stream, :posts, 2)
-    end
-
-    test "posts_firehose_en function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :posts_firehose_en, 1) or
-               function_exported?(Xdk.Stream, :posts_firehose_en, 2)
-    end
-
-    test "posts_firehose_ko function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :posts_firehose_ko, 1) or
-               function_exported?(Xdk.Stream, :posts_firehose_ko, 2)
-    end
-
-    test "likes_sample10 function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :likes_sample10, 1) or
-               function_exported?(Xdk.Stream, :likes_sample10, 2)
-    end
-
-    test "posts_firehose function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :posts_firehose, 1) or
-               function_exported?(Xdk.Stream, :posts_firehose, 2)
-    end
-
-    test "posts_compliance function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :posts_compliance, 1) or
-               function_exported?(Xdk.Stream, :posts_compliance, 2)
-    end
-
-    test "posts_firehose_pt function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :posts_firehose_pt, 1) or
-               function_exported?(Xdk.Stream, :posts_firehose_pt, 2)
     end
 
     test "get_rule_counts function exists" do
@@ -79,39 +17,32 @@ defmodule Xdk.StreamTest do
                function_exported?(Xdk.Stream, :get_rule_counts, 2)
     end
 
-    test "users_compliance function exists" do
+    test "posts_firehose_pt function exists" do
       Code.ensure_loaded!(Xdk.Stream)
 
-      assert function_exported?(Xdk.Stream, :users_compliance, 1) or
-               function_exported?(Xdk.Stream, :users_compliance, 2)
+      assert function_exported?(Xdk.Stream, :posts_firehose_pt, 1) or
+               function_exported?(Xdk.Stream, :posts_firehose_pt, 2)
     end
 
-    test "labels_compliance function exists" do
+    test "likes_firehose function exists" do
       Code.ensure_loaded!(Xdk.Stream)
 
-      assert function_exported?(Xdk.Stream, :labels_compliance, 1) or
-               function_exported?(Xdk.Stream, :labels_compliance, 2)
+      assert function_exported?(Xdk.Stream, :likes_firehose, 1) or
+               function_exported?(Xdk.Stream, :likes_firehose, 2)
     end
 
-    test "likes_compliance function exists" do
+    test "posts_compliance function exists" do
       Code.ensure_loaded!(Xdk.Stream)
 
-      assert function_exported?(Xdk.Stream, :likes_compliance, 1) or
-               function_exported?(Xdk.Stream, :likes_compliance, 2)
+      assert function_exported?(Xdk.Stream, :posts_compliance, 1) or
+               function_exported?(Xdk.Stream, :posts_compliance, 2)
     end
 
-    test "posts_sample10 function exists" do
+    test "posts_firehose_en function exists" do
       Code.ensure_loaded!(Xdk.Stream)
 
-      assert function_exported?(Xdk.Stream, :posts_sample10, 1) or
-               function_exported?(Xdk.Stream, :posts_sample10, 2)
-    end
-
-    test "posts_sample function exists" do
-      Code.ensure_loaded!(Xdk.Stream)
-
-      assert function_exported?(Xdk.Stream, :posts_sample, 1) or
-               function_exported?(Xdk.Stream, :posts_sample, 2)
+      assert function_exported?(Xdk.Stream, :posts_firehose_en, 1) or
+               function_exported?(Xdk.Stream, :posts_firehose_en, 2)
     end
 
     test "get_rules function exists" do
@@ -124,8 +55,165 @@ defmodule Xdk.StreamTest do
     test "update_rules function exists" do
       Code.ensure_loaded!(Xdk.Stream)
 
-      assert function_exported?(Xdk.Stream, :update_rules, 1) or
-               function_exported?(Xdk.Stream, :update_rules, 2)
+      assert function_exported?(Xdk.Stream, :update_rules, 2) or
+               function_exported?(Xdk.Stream, :update_rules, 3)
+    end
+
+    test "users_compliance function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :users_compliance, 1) or
+               function_exported?(Xdk.Stream, :users_compliance, 2)
+    end
+
+    test "posts_firehose_ko function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :posts_firehose_ko, 1) or
+               function_exported?(Xdk.Stream, :posts_firehose_ko, 2)
+    end
+
+    test "posts_sample10 function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :posts_sample10, 1) or
+               function_exported?(Xdk.Stream, :posts_sample10, 2)
+    end
+
+    test "labels_compliance function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :labels_compliance, 1) or
+               function_exported?(Xdk.Stream, :labels_compliance, 2)
+    end
+
+    test "posts function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :posts, 1) or
+               function_exported?(Xdk.Stream, :posts, 2)
+    end
+
+    test "posts_firehose function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :posts_firehose, 1) or
+               function_exported?(Xdk.Stream, :posts_firehose, 2)
+    end
+
+    test "posts_sample function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :posts_sample, 1) or
+               function_exported?(Xdk.Stream, :posts_sample, 2)
+    end
+
+    test "posts_firehose_ja function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :posts_firehose_ja, 1) or
+               function_exported?(Xdk.Stream, :posts_firehose_ja, 2)
+    end
+
+    test "likes_sample10 function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :likes_sample10, 1) or
+               function_exported?(Xdk.Stream, :likes_sample10, 2)
+    end
+
+    test "likes_compliance function exists" do
+      Code.ensure_loaded!(Xdk.Stream)
+
+      assert function_exported?(Xdk.Stream, :likes_compliance, 1) or
+               function_exported?(Xdk.Stream, :likes_compliance, 2)
+    end
+  end
+
+  describe "get_rule_counts/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/stream/rules/counts", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Stream.get_rule_counts(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/stream/rules/counts", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Stream.get_rule_counts(client)
+    end
+  end
+
+  describe "get_rules/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/stream/rules", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Stream.get_rules(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/stream/rules", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Stream.get_rules(client)
+    end
+  end
+
+  describe "update_rules/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/tweets/search/stream/rules", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Stream.update_rules(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/tweets/search/stream/rules", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Stream.update_rules(client, %{})
     end
   end
 end

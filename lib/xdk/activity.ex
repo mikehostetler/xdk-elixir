@@ -12,7 +12,8 @@ defmodule Xdk.Activity do
   Stream of X Activities
 
   """
-  @spec stream(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec stream(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
   def stream(client, opts \\ []) do
     query =
       [
@@ -20,9 +21,48 @@ defmodule Xdk.Activity do
         {"start_time", Keyword.get(opts, :start_time)},
         {"end_time", Keyword.get(opts, :end_time)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/activity/stream", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/activity/stream", query: query)
+  end
+
+  @doc """
+  Update X activity subscription
+
+  PUT /2/activity/subscriptions/{subscription_id}
+
+  Updates a subscription for an X activity event
+
+  """
+  @spec update_subscription(Xdk.t(), subscription_id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def update_subscription(client, subscription_id, body) do
+    Xdk.request(client, :put, "/2/activity/subscriptions/{subscription_id}",
+      params: %{
+        "subscription_id" => subscription_id
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Deletes X activity subscription
+
+  DELETE /2/activity/subscriptions/{subscription_id}
+
+  Deletes a subscription for an X activity event
+
+  """
+  @spec delete_subscription(Xdk.t(), subscription_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def delete_subscription(client, subscription_id) do
+    Xdk.request(client, :delete, "/2/activity/subscriptions/{subscription_id}",
+      params: %{
+        "subscription_id" => subscription_id
+      }
+    )
   end
 
   @doc """
@@ -33,14 +73,16 @@ defmodule Xdk.Activity do
   Get a list of active subscriptions for XAA
 
   """
-  @spec get_subscriptions(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_subscriptions(Xdk.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_subscriptions(client, opts \\ []) do
     query =
       [
         {"max_results", Keyword.get(opts, :max_results)},
         {"pagination_token", Keyword.get(opts, :pagination_token)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/activity/subscriptions", query: query)
   end
@@ -53,44 +95,9 @@ defmodule Xdk.Activity do
   Creates a subscription for an X activity event
 
   """
-  @spec create_subscription(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def create_subscription(client) do
-    Xdk.request(client, :post, "/2/activity/subscriptions")
-  end
+  @spec create_subscription(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
 
-  @doc """
-  Update X activity subscription
-
-  PUT /2/activity/subscriptions/{subscription_id}
-
-  Updates a subscription for an X activity event
-
-  """
-  @spec update_subscription(Xdk.t(), subscription_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def update_subscription(client, subscription_id) do
-    Xdk.request(client, :put, "/2/activity/subscriptions/{subscription_id}",
-      params: %{
-        "subscription_id" => subscription_id
-      }
-    )
-  end
-
-  @doc """
-  Deletes X activity subscription
-
-  DELETE /2/activity/subscriptions/{subscription_id}
-
-  Deletes a subscription for an X activity event
-
-  """
-  @spec delete_subscription(Xdk.t(), subscription_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def delete_subscription(client, subscription_id) do
-    Xdk.request(client, :delete, "/2/activity/subscriptions/{subscription_id}",
-      params: %{
-        "subscription_id" => subscription_id
-      }
-    )
+  def create_subscription(client, body) do
+    Xdk.request(client, :post, "/2/activity/subscriptions", json: body)
   end
 end

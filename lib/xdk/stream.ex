@@ -5,216 +5,23 @@ defmodule Xdk.Stream do
   @moduledoc "Auto-generated client for stream operations"
 
   @doc """
-  Stream Japanese Posts
+  Get stream rule counts
 
-  GET /2/tweets/firehose/stream/lang/ja
+  GET /2/tweets/search/stream/rules/counts
 
-  Streams all public Japanese-language Posts in real-time.
-
-  """
-  @spec posts_firehose_ja(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def posts_firehose_ja(client, opts \\ []) do
-    query =
-      [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"partition", Keyword.get(opts, :partition)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/tweets/firehose/stream/lang/ja", query: query)
-  end
-
-  @doc """
-  Stream all Likes
-
-  GET /2/likes/firehose/stream
-
-  Streams all public Likes in real-time.
+  Retrieves the count of rules in the active rule set for the filtered stream.
 
   """
-  @spec likes_firehose(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def likes_firehose(client, opts \\ []) do
+  @spec get_rule_counts(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_rule_counts(client, opts \\ []) do
     query =
       [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"partition", Keyword.get(opts, :partition)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"like_with_tweet_author.fields", Keyword.get(opts, :like_with_tweet_author_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+        {"rules_count.fields", Keyword.get(opts, :rules_count_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/likes/firehose/stream", query: query)
-  end
-
-  @doc """
-  Stream filtered Posts
-
-  GET /2/tweets/search/stream
-
-  Streams Posts in real-time matching the active rule set.
-
-  """
-  @spec posts(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def posts(client, opts \\ []) do
-    query =
-      [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/tweets/search/stream", query: query)
-  end
-
-  @doc """
-  Stream English Posts
-
-  GET /2/tweets/firehose/stream/lang/en
-
-  Streams all public English-language Posts in real-time.
-
-  """
-  @spec posts_firehose_en(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def posts_firehose_en(client, opts \\ []) do
-    query =
-      [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"partition", Keyword.get(opts, :partition)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/tweets/firehose/stream/lang/en", query: query)
-  end
-
-  @doc """
-  Stream Korean Posts
-
-  GET /2/tweets/firehose/stream/lang/ko
-
-  Streams all public Korean-language Posts in real-time.
-
-  """
-  @spec posts_firehose_ko(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def posts_firehose_ko(client, opts \\ []) do
-    query =
-      [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"partition", Keyword.get(opts, :partition)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/tweets/firehose/stream/lang/ko", query: query)
-  end
-
-  @doc """
-  Stream sampled Likes
-
-  GET /2/likes/sample10/stream
-
-  Streams a 10% sample of public Likes in real-time.
-
-  """
-  @spec likes_sample10(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def likes_sample10(client, opts \\ []) do
-    query =
-      [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"partition", Keyword.get(opts, :partition)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"like_with_tweet_author.fields", Keyword.get(opts, :like_with_tweet_author_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/likes/sample10/stream", query: query)
-  end
-
-  @doc """
-  Stream all Posts
-
-  GET /2/tweets/firehose/stream
-
-  Streams all public Posts in real-time.
-
-  """
-  @spec posts_firehose(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def posts_firehose(client, opts \\ []) do
-    query =
-      [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"partition", Keyword.get(opts, :partition)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/tweets/firehose/stream", query: query)
-  end
-
-  @doc """
-  Stream Posts compliance data
-
-  GET /2/tweets/compliance/stream
-
-  Streams all compliance data related to Posts.
-
-  """
-  @spec posts_compliance(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def posts_compliance(client, opts \\ []) do
-    query =
-      [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"partition", Keyword.get(opts, :partition)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/tweets/compliance/stream", query: query)
+    Xdk.request(client, :get, "/2/tweets/search/stream/rules/counts", query: query)
   end
 
   @doc """
@@ -225,7 +32,8 @@ defmodule Xdk.Stream do
   Streams all public Portuguese-language Posts in real-time.
 
   """
-  @spec posts_firehose_pt(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec posts_firehose_pt(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
   def posts_firehose_pt(client, opts \\ []) do
     query =
       [
@@ -240,28 +48,135 @@ defmodule Xdk.Stream do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/tweets/firehose/stream/lang/pt", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/firehose/stream/lang/pt", query: query)
   end
 
   @doc """
-  Get stream rule counts
+  Stream all Likes
 
-  GET /2/tweets/search/stream/rules/counts
+  GET /2/likes/firehose/stream
 
-  Retrieves the count of rules in the active rule set for the filtered stream.
+  Streams all public Likes in real-time.
 
   """
-  @spec get_rule_counts(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_rule_counts(client, opts \\ []) do
+  @spec likes_firehose(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def likes_firehose(client, opts \\ []) do
     query =
       [
-        {"rules_count.fields", Keyword.get(opts, :rules_count_fields)}
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"partition", Keyword.get(opts, :partition)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"like_with_tweet_author.fields", Keyword.get(opts, :like_with_tweet_author_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/tweets/search/stream/rules/counts", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/likes/firehose/stream", query: query)
+  end
+
+  @doc """
+  Stream Posts compliance data
+
+  GET /2/tweets/compliance/stream
+
+  Streams all compliance data related to Posts.
+
+  """
+  @spec posts_compliance(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def posts_compliance(client, opts \\ []) do
+    query =
+      [
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"partition", Keyword.get(opts, :partition)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/compliance/stream", query: query)
+  end
+
+  @doc """
+  Stream English Posts
+
+  GET /2/tweets/firehose/stream/lang/en
+
+  Streams all public English-language Posts in real-time.
+
+  """
+  @spec posts_firehose_en(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def posts_firehose_en(client, opts \\ []) do
+    query =
+      [
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"partition", Keyword.get(opts, :partition)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/firehose/stream/lang/en", query: query)
+  end
+
+  @doc """
+  Get stream rules
+
+  GET /2/tweets/search/stream/rules
+
+  Retrieves the active rule set or a subset of rules for the filtered stream.
+
+  """
+  @spec get_rules(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_rules(client, opts \\ []) do
+    query =
+      [
+        {"ids", Keyword.get(opts, :ids)},
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/tweets/search/stream/rules", query: query)
+  end
+
+  @doc """
+  Update stream rules
+
+  POST /2/tweets/search/stream/rules
+
+  Adds or deletes rules from the active rule set for the filtered stream.
+
+  """
+  @spec update_rules(Xdk.t(), body :: map(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def update_rules(client, body, opts \\ []) do
+    query =
+      [
+        {"dry_run", Keyword.get(opts, :dry_run)},
+        {"delete_all", Keyword.get(opts, :delete_all)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :post, "/2/tweets/search/stream/rules",
+      query: query,
+      json: body
+    )
   end
 
   @doc """
@@ -272,7 +187,8 @@ defmodule Xdk.Stream do
   Streams all compliance data related to Users.
 
   """
-  @spec users_compliance(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec users_compliance(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
   def users_compliance(client, opts \\ []) do
     query =
       [
@@ -281,51 +197,38 @@ defmodule Xdk.Stream do
         {"start_time", Keyword.get(opts, :start_time)},
         {"end_time", Keyword.get(opts, :end_time)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/users/compliance/stream", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/users/compliance/stream", query: query)
   end
 
   @doc """
-  Stream Post labels
+  Stream Korean Posts
 
-  GET /2/tweets/label/stream
+  GET /2/tweets/firehose/stream/lang/ko
 
-  Streams all labeling events applied to Posts.
+  Streams all public Korean-language Posts in real-time.
 
   """
-  @spec labels_compliance(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def labels_compliance(client, opts \\ []) do
+  @spec posts_firehose_ko(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def posts_firehose_ko(client, opts \\ []) do
     query =
       [
         {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"partition", Keyword.get(opts, :partition)},
         {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)}
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/tweets/label/stream", query: query)
-  end
-
-  @doc """
-  Stream Likes compliance data
-
-  GET /2/likes/compliance/stream
-
-  Streams all compliance data related to Likes for Users.
-
-  """
-  @spec likes_compliance(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def likes_compliance(client, opts \\ []) do
-    query =
-      [
-        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/likes/compliance/stream", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/firehose/stream/lang/ko", query: query)
   end
 
   @doc """
@@ -336,7 +239,8 @@ defmodule Xdk.Stream do
   Streams a 10% sample of public Posts in real-time.
 
   """
-  @spec posts_sample10(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec posts_sample10(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
   def posts_sample10(client, opts \\ []) do
     query =
       [
@@ -351,9 +255,88 @@ defmodule Xdk.Stream do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/tweets/sample10/stream", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/sample10/stream", query: query)
+  end
+
+  @doc """
+  Stream Post labels
+
+  GET /2/tweets/label/stream
+
+  Streams all labeling events applied to Posts.
+
+  """
+  @spec labels_compliance(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def labels_compliance(client, opts \\ []) do
+    query =
+      [
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/label/stream", query: query)
+  end
+
+  @doc """
+  Stream filtered Posts
+
+  GET /2/tweets/search/stream
+
+  Streams Posts in real-time matching the active rule set.
+
+  """
+  @spec posts(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def posts(client, opts \\ []) do
+    query =
+      [
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/search/stream", query: query)
+  end
+
+  @doc """
+  Stream all Posts
+
+  GET /2/tweets/firehose/stream
+
+  Streams all public Posts in real-time.
+
+  """
+  @spec posts_firehose(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def posts_firehose(client, opts \\ []) do
+    query =
+      [
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"partition", Keyword.get(opts, :partition)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/firehose/stream", query: query)
   end
 
   @doc """
@@ -364,7 +347,8 @@ defmodule Xdk.Stream do
   Streams a 1% sample of public Posts in real-time.
 
   """
-  @spec posts_sample(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec posts_sample(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
   def posts_sample(client, opts \\ []) do
     query =
       [
@@ -376,49 +360,86 @@ defmodule Xdk.Stream do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/tweets/sample/stream", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/sample/stream", query: query)
   end
 
   @doc """
-  Get stream rules
+  Stream Japanese Posts
 
-  GET /2/tweets/search/stream/rules
+  GET /2/tweets/firehose/stream/lang/ja
 
-  Retrieves the active rule set or a subset of rules for the filtered stream.
+  Streams all public Japanese-language Posts in real-time.
 
   """
-  @spec get_rules(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_rules(client, opts \\ []) do
+  @spec posts_firehose_ja(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def posts_firehose_ja(client, opts \\ []) do
     query =
       [
-        {"ids", Keyword.get(opts, :ids)},
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)}
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"partition", Keyword.get(opts, :partition)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/tweets/search/stream/rules", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/tweets/firehose/stream/lang/ja", query: query)
   end
 
   @doc """
-  Update stream rules
+  Stream sampled Likes
 
-  POST /2/tweets/search/stream/rules
+  GET /2/likes/sample10/stream
 
-  Adds or deletes rules from the active rule set for the filtered stream.
+  Streams a 10% sample of public Likes in real-time.
 
   """
-  @spec update_rules(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def update_rules(client, opts \\ []) do
+  @spec likes_sample10(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def likes_sample10(client, opts \\ []) do
     query =
       [
-        {"dry_run", Keyword.get(opts, :dry_run)},
-        {"delete_all", Keyword.get(opts, :delete_all)}
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"partition", Keyword.get(opts, :partition)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"like_with_tweet_author.fields", Keyword.get(opts, :like_with_tweet_author_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :post, "/2/tweets/search/stream/rules", query: query)
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/likes/sample10/stream", query: query)
+  end
+
+  @doc """
+  Stream Likes compliance data
+
+  GET /2/likes/compliance/stream
+
+  Streams all compliance data related to Likes for Users.
+
+  """
+  @spec likes_compliance(Xdk.t(), opts :: keyword()) :: Enumerable.t()
+
+  def likes_compliance(client, opts \\ []) do
+    query =
+      [
+        {"backfill_minutes", Keyword.get(opts, :backfill_minutes)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.Streaming.ndjson_stream(client, :get, "/2/likes/compliance/stream", query: query)
   end
 end

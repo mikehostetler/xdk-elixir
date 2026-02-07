@@ -3,29 +3,11 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.ListsTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Lists)
-    end
-
-    test "get_followers function exists" do
-      Code.ensure_loaded!(Xdk.Lists)
-
-      assert function_exported?(Xdk.Lists, :get_followers, 2) or
-               function_exported?(Xdk.Lists, :get_followers, 3)
-    end
-
-    test "get_posts function exists" do
-      Code.ensure_loaded!(Xdk.Lists)
-
-      assert function_exported?(Xdk.Lists, :get_posts, 2) or
-               function_exported?(Xdk.Lists, :get_posts, 3)
-    end
-
-    test "remove_member_by_user_id function exists" do
-      Code.ensure_loaded!(Xdk.Lists)
-      assert function_exported?(Xdk.Lists, :remove_member_by_user_id, 3)
     end
 
     test "get_members function exists" do
@@ -37,7 +19,24 @@ defmodule Xdk.ListsTest do
 
     test "add_member function exists" do
       Code.ensure_loaded!(Xdk.Lists)
-      assert function_exported?(Xdk.Lists, :add_member, 2)
+      assert function_exported?(Xdk.Lists, :add_member, 3)
+    end
+
+    test "get_followers function exists" do
+      Code.ensure_loaded!(Xdk.Lists)
+
+      assert function_exported?(Xdk.Lists, :get_followers, 2) or
+               function_exported?(Xdk.Lists, :get_followers, 3)
+    end
+
+    test "remove_member_by_user_id function exists" do
+      Code.ensure_loaded!(Xdk.Lists)
+      assert function_exported?(Xdk.Lists, :remove_member_by_user_id, 3)
+    end
+
+    test "create function exists" do
+      Code.ensure_loaded!(Xdk.Lists)
+      assert function_exported?(Xdk.Lists, :create, 2)
     end
 
     test "get_by_id function exists" do
@@ -49,7 +48,7 @@ defmodule Xdk.ListsTest do
 
     test "update function exists" do
       Code.ensure_loaded!(Xdk.Lists)
-      assert function_exported?(Xdk.Lists, :update, 2)
+      assert function_exported?(Xdk.Lists, :update, 3)
     end
 
     test "delete function exists" do
@@ -57,9 +56,272 @@ defmodule Xdk.ListsTest do
       assert function_exported?(Xdk.Lists, :delete, 2)
     end
 
-    test "create function exists" do
+    test "get_posts function exists" do
       Code.ensure_loaded!(Xdk.Lists)
-      assert function_exported?(Xdk.Lists, :create, 1)
+
+      assert function_exported?(Xdk.Lists, :get_posts, 2) or
+               function_exported?(Xdk.Lists, :get_posts, 3)
+    end
+  end
+
+  describe "get_members/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/lists/test_id/members", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.get_members(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/lists/test_id/members", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.get_members(client, "test_id")
+    end
+  end
+
+  describe "add_member/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/lists/test_id/members", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.add_member(client, "test_id", %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/lists/test_id/members", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.add_member(client, "test_id", %{})
+    end
+  end
+
+  describe "get_followers/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/lists/test_id/followers", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.get_followers(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/lists/test_id/followers", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.get_followers(client, "test_id")
+    end
+  end
+
+  describe "remove_member_by_user_id/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/lists/test_id/members/test_user_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.remove_member_by_user_id(client, "test_id", "test_user_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/lists/test_id/members/test_user_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.remove_member_by_user_id(client, "test_id", "test_user_id")
+    end
+  end
+
+  describe "create/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/lists", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.create(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/lists", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.create(client, %{})
+    end
+  end
+
+  describe "get_by_id/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/lists/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.get_by_id(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/lists/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.get_by_id(client, "test_id")
+    end
+  end
+
+  describe "update/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "PUT", "/2/lists/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.update(client, "test_id", %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "PUT", "/2/lists/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.update(client, "test_id", %{})
+    end
+  end
+
+  describe "delete/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/lists/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.delete(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/lists/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.delete(client, "test_id")
+    end
+  end
+
+  describe "get_posts/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/lists/test_id/tweets", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Lists.get_posts(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/lists/test_id/tweets", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Lists.get_posts(client, "test_id")
     end
   end
 end

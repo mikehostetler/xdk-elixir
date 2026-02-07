@@ -3,10 +3,18 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.MediaTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Media)
+    end
+
+    test "get_by_keys function exists" do
+      Code.ensure_loaded!(Xdk.Media)
+
+      assert function_exported?(Xdk.Media, :get_by_keys, 1) or
+               function_exported?(Xdk.Media, :get_by_keys, 2)
     end
 
     test "get_upload_status function exists" do
@@ -18,32 +26,27 @@ defmodule Xdk.MediaTest do
 
     test "upload function exists" do
       Code.ensure_loaded!(Xdk.Media)
-      assert function_exported?(Xdk.Media, :upload, 1)
-    end
-
-    test "finalize_upload function exists" do
-      Code.ensure_loaded!(Xdk.Media)
-      assert function_exported?(Xdk.Media, :finalize_upload, 2)
+      assert function_exported?(Xdk.Media, :upload, 2)
     end
 
     test "create_subtitles function exists" do
       Code.ensure_loaded!(Xdk.Media)
-      assert function_exported?(Xdk.Media, :create_subtitles, 1)
+      assert function_exported?(Xdk.Media, :create_subtitles, 2)
     end
 
     test "delete_subtitles function exists" do
       Code.ensure_loaded!(Xdk.Media)
-      assert function_exported?(Xdk.Media, :delete_subtitles, 1)
+      assert function_exported?(Xdk.Media, :delete_subtitles, 2)
     end
 
     test "append_upload function exists" do
       Code.ensure_loaded!(Xdk.Media)
-      assert function_exported?(Xdk.Media, :append_upload, 2)
+      assert function_exported?(Xdk.Media, :append_upload, 3)
     end
 
     test "initialize_upload function exists" do
       Code.ensure_loaded!(Xdk.Media)
-      assert function_exported?(Xdk.Media, :initialize_upload, 1)
+      assert function_exported?(Xdk.Media, :initialize_upload, 2)
     end
 
     test "get_by_key function exists" do
@@ -53,23 +56,340 @@ defmodule Xdk.MediaTest do
                function_exported?(Xdk.Media, :get_by_key, 3)
     end
 
-    test "get_by_keys function exists" do
-      Code.ensure_loaded!(Xdk.Media)
-
-      assert function_exported?(Xdk.Media, :get_by_keys, 1) or
-               function_exported?(Xdk.Media, :get_by_keys, 2)
-    end
-
-    test "create_metadata function exists" do
-      Code.ensure_loaded!(Xdk.Media)
-      assert function_exported?(Xdk.Media, :create_metadata, 1)
-    end
-
     test "get_analytics function exists" do
       Code.ensure_loaded!(Xdk.Media)
 
       assert function_exported?(Xdk.Media, :get_analytics, 1) or
                function_exported?(Xdk.Media, :get_analytics, 2)
+    end
+
+    test "finalize_upload function exists" do
+      Code.ensure_loaded!(Xdk.Media)
+      assert function_exported?(Xdk.Media, :finalize_upload, 2)
+    end
+
+    test "create_metadata function exists" do
+      Code.ensure_loaded!(Xdk.Media)
+      assert function_exported?(Xdk.Media, :create_metadata, 2)
+    end
+  end
+
+  describe "get_by_keys/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/media", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.get_by_keys(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/media", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.get_by_keys(client)
+    end
+  end
+
+  describe "get_upload_status/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/media/upload", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.get_upload_status(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/media/upload", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.get_upload_status(client)
+    end
+  end
+
+  describe "upload/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/upload", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.upload(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/upload", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.upload(client, %{})
+    end
+  end
+
+  describe "create_subtitles/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/subtitles", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.create_subtitles(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/subtitles", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.create_subtitles(client, %{})
+    end
+  end
+
+  describe "delete_subtitles/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/media/subtitles", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.delete_subtitles(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/media/subtitles", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.delete_subtitles(client, %{})
+    end
+  end
+
+  describe "append_upload/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/upload/test_id/append", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.append_upload(client, "test_id", %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/upload/test_id/append", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.append_upload(client, "test_id", %{})
+    end
+  end
+
+  describe "initialize_upload/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/upload/initialize", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.initialize_upload(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/upload/initialize", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.initialize_upload(client, %{})
+    end
+  end
+
+  describe "get_by_key/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/media/test_media_key", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.get_by_key(client, "test_media_key")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/media/test_media_key", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.get_by_key(client, "test_media_key")
+    end
+  end
+
+  describe "get_analytics/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/media/analytics", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.get_analytics(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/media/analytics", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.get_analytics(client)
+    end
+  end
+
+  describe "finalize_upload/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/upload/test_id/finalize", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.finalize_upload(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/upload/test_id/finalize", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.finalize_upload(client, "test_id")
+    end
+  end
+
+  describe "create_metadata/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/metadata", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Media.create_metadata(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/media/metadata", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Media.create_metadata(client, %{})
     end
   end
 end

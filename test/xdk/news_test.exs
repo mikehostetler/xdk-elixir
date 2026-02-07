@@ -3,20 +3,79 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.NewsTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.News)
     end
 
+    test "search function exists" do
+      Code.ensure_loaded!(Xdk.News)
+      assert function_exported?(Xdk.News, :search, 1) or function_exported?(Xdk.News, :search, 2)
+    end
+
     test "get function exists" do
       Code.ensure_loaded!(Xdk.News)
       assert function_exported?(Xdk.News, :get, 2) or function_exported?(Xdk.News, :get, 3)
     end
+  end
 
-    test "search function exists" do
-      Code.ensure_loaded!(Xdk.News)
-      assert function_exported?(Xdk.News, :search, 1) or function_exported?(Xdk.News, :search, 2)
+  describe "search/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/news/search", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.News.search(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/news/search", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.News.search(client)
+    end
+  end
+
+  describe "get/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/news/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.News.get(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/news/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.News.get(client, "test_id")
     end
   end
 end

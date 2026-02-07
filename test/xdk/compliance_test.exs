@@ -3,6 +3,7 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.ComplianceTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
@@ -18,7 +19,7 @@ defmodule Xdk.ComplianceTest do
 
     test "create_jobs function exists" do
       Code.ensure_loaded!(Xdk.Compliance)
-      assert function_exported?(Xdk.Compliance, :create_jobs, 1)
+      assert function_exported?(Xdk.Compliance, :create_jobs, 2)
     end
 
     test "get_jobs_by_id function exists" do
@@ -26,6 +27,93 @@ defmodule Xdk.ComplianceTest do
 
       assert function_exported?(Xdk.Compliance, :get_jobs_by_id, 2) or
                function_exported?(Xdk.Compliance, :get_jobs_by_id, 3)
+    end
+  end
+
+  describe "get_jobs/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/compliance/jobs", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Compliance.get_jobs(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/compliance/jobs", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Compliance.get_jobs(client)
+    end
+  end
+
+  describe "create_jobs/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/compliance/jobs", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Compliance.create_jobs(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/compliance/jobs", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Compliance.create_jobs(client, %{})
+    end
+  end
+
+  describe "get_jobs_by_id/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/compliance/jobs/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Compliance.get_jobs_by_id(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/compliance/jobs/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Compliance.get_jobs_by_id(client, "test_id")
     end
   end
 end

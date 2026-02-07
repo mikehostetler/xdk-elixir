@@ -3,6 +3,7 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.MarketplaceTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
@@ -14,6 +15,45 @@ defmodule Xdk.MarketplaceTest do
 
       assert function_exported?(Xdk.Marketplace, :get_handle_availability, 2) or
                function_exported?(Xdk.Marketplace, :get_handle_availability, 3)
+    end
+  end
+
+  describe "get_handle_availability/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "GET",
+        "/2/marketplace/handles/test_handle/availability",
+        fn conn ->
+          assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(200, ~s({"data":{}}))
+        end
+      )
+
+      Xdk.Marketplace.get_handle_availability(client, "test_handle")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "GET",
+        "/2/marketplace/handles/test_handle/availability",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+        end
+      )
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Marketplace.get_handle_availability(client, "test_handle")
     end
   end
 end

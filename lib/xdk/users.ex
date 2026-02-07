@@ -5,88 +5,17 @@ defmodule Xdk.Users do
   @moduledoc "Auto-generated client for users operations"
 
   @doc """
-  Block DMs
+  Get followers
 
-  POST /2/users/{id}/dm/block
+  GET /2/users/{id}/followers
 
-  Blocks direct messages to or from a specific User by their ID for the authenticated user.
-
-  """
-  @spec block_dms(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def block_dms(client, id) do
-    Xdk.request(client, :post, "/2/users/{id}/dm/block",
-      params: %{
-        "id" => id
-      }
-    )
-  end
-
-  @doc """
-  Like Post
-
-  POST /2/users/{id}/likes
-
-  Causes the authenticated user to Like a specific Post by its ID.
+  Retrieves a list of Users who follow a specific User by their ID.
 
   """
-  @spec like_post(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def like_post(client, id) do
-    Xdk.request(client, :post, "/2/users/{id}/likes",
-      params: %{
-        "id" => id
-      }
-    )
-  end
+  @spec get_followers(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
 
-  @doc """
-  Unrepost Post
-
-  DELETE /2/users/{id}/retweets/{source_tweet_id}
-
-  Causes the authenticated user to unrepost a specific Post by its ID.
-
-  """
-  @spec unrepost_post(Xdk.t(), id :: any(), source_tweet_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def unrepost_post(client, id, source_tweet_id) do
-    Xdk.request(client, :delete, "/2/users/{id}/retweets/{source_tweet_id}",
-      params: %{
-        "id" => id,
-        "source_tweet_id" => source_tweet_id
-      }
-    )
-  end
-
-  @doc """
-  Unfollow User
-
-  DELETE /2/users/{source_user_id}/following/{target_user_id}
-
-  Causes the authenticated user to unfollow a specific user by their ID.
-
-  """
-  @spec unfollow_user(Xdk.t(), source_user_id :: any(), target_user_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def unfollow_user(client, source_user_id, target_user_id) do
-    Xdk.request(client, :delete, "/2/users/{source_user_id}/following/{target_user_id}",
-      params: %{
-        "source_user_id" => source_user_id,
-        "target_user_id" => target_user_id
-      }
-    )
-  end
-
-  @doc """
-  Get blocking
-
-  GET /2/users/{id}/blocking
-
-  Retrieves a list of Users blocked by the specified User ID.
-
-  """
-  @spec get_blocking(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_blocking(client, id, opts \\ []) do
+  def get_followers(client, id, opts \\ []) do
     query =
       [
         {"max_results", Keyword.get(opts, :max_results)},
@@ -95,393 +24,14 @@ defmodule Xdk.Users do
         {"expansions", Keyword.get(opts, :expansions)},
         {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/users/{id}/blocking",
+    Xdk.request(client, :get, "/2/users/{id}/followers",
       params: %{
         "id" => id
       },
       query: query
     )
-  end
-
-  @doc """
-  Unpin List
-
-  DELETE /2/users/{id}/pinned_lists/{list_id}
-
-  Causes the authenticated user to unpin a specific List by its ID.
-
-  """
-  @spec unpin_list(Xdk.t(), id :: any(), list_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def unpin_list(client, id, list_id) do
-    Xdk.request(client, :delete, "/2/users/{id}/pinned_lists/{list_id}",
-      params: %{
-        "id" => id,
-        "list_id" => list_id
-      }
-    )
-  end
-
-  @doc """
-  Get owned Lists
-
-  GET /2/users/{id}/owned_lists
-
-  Retrieves a list of Lists owned by a specific User by their ID.
-
-  """
-  @spec get_owned_lists(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_owned_lists(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"list.fields", Keyword.get(opts, :list_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"user.fields", Keyword.get(opts, :user_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/owned_lists",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Get liked Posts
-
-  GET /2/users/{id}/liked_tweets
-
-  Retrieves a list of Posts liked by a specific User by their ID.
-
-  """
-  @spec get_liked_posts(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_liked_posts(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/liked_tweets",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Get List memberships
-
-  GET /2/users/{id}/list_memberships
-
-  Retrieves a list of Lists that a specific User is a member of by their ID.
-
-  """
-  @spec get_list_memberships(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_list_memberships(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"list.fields", Keyword.get(opts, :list_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"user.fields", Keyword.get(opts, :user_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/list_memberships",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Get Posts
-
-  GET /2/users/{id}/tweets
-
-  Retrieves a list of posts authored by a specific User by their ID.
-
-  """
-  @spec get_posts(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_posts(client, id, opts \\ []) do
-    query =
-      [
-        {"since_id", Keyword.get(opts, :since_id)},
-        {"until_id", Keyword.get(opts, :until_id)},
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"exclude", Keyword.get(opts, :exclude)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/tweets",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Get pinned Lists
-
-  GET /2/users/{id}/pinned_lists
-
-  Retrieves a list of Lists pinned by the authenticated user.
-
-  """
-  @spec get_pinned_lists(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_pinned_lists(client, id, opts \\ []) do
-    query =
-      [
-        {"list.fields", Keyword.get(opts, :list_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"user.fields", Keyword.get(opts, :user_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/pinned_lists",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Pin List
-
-  POST /2/users/{id}/pinned_lists
-
-  Causes the authenticated user to pin a specific List by its ID.
-
-  """
-  @spec pin_list(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def pin_list(client, id) do
-    Xdk.request(client, :post, "/2/users/{id}/pinned_lists",
-      params: %{
-        "id" => id
-      }
-    )
-  end
-
-  @doc """
-  Get affiliates
-
-  GET /2/users/{id}/affiliates
-
-  Retrieves a list of Users who are affiliated with a specific organization User by their ID.
-
-  """
-  @spec get_affiliates(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_affiliates(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/affiliates",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Get following
-
-  GET /2/users/{id}/following
-
-  Retrieves a list of Users followed by a specific User by their ID.
-
-  """
-  @spec get_following(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_following(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/following",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Follow User
-
-  POST /2/users/{id}/following
-
-  Causes the authenticated user to follow a specific user by their ID.
-
-  """
-  @spec follow_user(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def follow_user(client, id) do
-    Xdk.request(client, :post, "/2/users/{id}/following",
-      params: %{
-        "id" => id
-      }
-    )
-  end
-
-  @doc """
-  Repost Post
-
-  POST /2/users/{id}/retweets
-
-  Causes the authenticated user to repost a specific Post by its ID.
-
-  """
-  @spec repost_post(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def repost_post(client, id) do
-    Xdk.request(client, :post, "/2/users/{id}/retweets",
-      params: %{
-        "id" => id
-      }
-    )
-  end
-
-  @doc """
-  Get Bookmark folders
-
-  GET /2/users/{id}/bookmarks/folders
-
-  Retrieves a list of Bookmark folders created by the authenticated user.
-
-  """
-  @spec get_bookmark_folders(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_bookmark_folders(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/bookmarks/folders",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Get User by ID
-
-  GET /2/users/{id}
-
-  Retrieves details of a specific User by their ID.
-
-  """
-  @spec get_by_id(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_by_id(client, id, opts \\ []) do
-    query =
-      [
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Get Users by usernames
-
-  GET /2/users/by
-
-  Retrieves details of multiple Users by their usernames.
-
-  """
-  @spec get_by_usernames(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_by_usernames(client, opts \\ []) do
-    query =
-      [
-        {"usernames", Keyword.get(opts, :usernames)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/by", query: query)
-  end
-
-  @doc """
-  Get Users by IDs
-
-  GET /2/users
-
-  Retrieves details of multiple Users by their IDs.
-
-  """
-  @spec get_by_ids(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_by_ids(client, opts \\ []) do
-    query =
-      [
-        {"ids", Keyword.get(opts, :ids)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users", query: query)
   end
 
   @doc """
@@ -492,8 +42,9 @@ defmodule Xdk.Users do
   Retrieves a list of Posts that mention a specific User by their ID.
 
   """
-  @spec get_mentions(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+  @spec get_mentions(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_mentions(client, id, opts \\ []) do
     query =
       [
@@ -510,114 +61,13 @@ defmodule Xdk.Users do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/users/{id}/mentions",
       params: %{
         "id" => id
       },
       query: query
-    )
-  end
-
-  @doc """
-  Get Bookmarks by folder ID
-
-  GET /2/users/{id}/bookmarks/folders/{folder_id}
-
-  Retrieves Posts in a specific Bookmark folder by its ID for the authenticated user.
-
-  """
-  @spec get_bookmarks_by_folder_id(Xdk.t(), id :: any(), folder_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_bookmarks_by_folder_id(client, id, folder_id) do
-    Xdk.request(client, :get, "/2/users/{id}/bookmarks/folders/{folder_id}",
-      params: %{
-        "id" => id,
-        "folder_id" => folder_id
-      }
-    )
-  end
-
-  @doc """
-  Unmute User
-
-  DELETE /2/users/{source_user_id}/muting/{target_user_id}
-
-  Causes the authenticated user to unmute a specific user by their ID.
-
-  """
-  @spec unmute_user(Xdk.t(), source_user_id :: any(), target_user_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def unmute_user(client, source_user_id, target_user_id) do
-    Xdk.request(client, :delete, "/2/users/{source_user_id}/muting/{target_user_id}",
-      params: %{
-        "source_user_id" => source_user_id,
-        "target_user_id" => target_user_id
-      }
-    )
-  end
-
-  @doc """
-  Unblock DMs
-
-  POST /2/users/{id}/dm/unblock
-
-  Unblocks direct messages to or from a specific User by their ID for the authenticated user.
-
-  """
-  @spec unblock_dms(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def unblock_dms(client, id) do
-    Xdk.request(client, :post, "/2/users/{id}/dm/unblock",
-      params: %{
-        "id" => id
-      }
-    )
-  end
-
-  @doc """
-  Get muting
-
-  GET /2/users/{id}/muting
-
-  Retrieves a list of Users muted by the authenticated user.
-
-  """
-  @spec get_muting(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_muting(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/muting",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Mute User
-
-  POST /2/users/{id}/muting
-
-  Causes the authenticated user to mute a specific User by their ID.
-
-  """
-  @spec mute_user(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def mute_user(client, id) do
-    Xdk.request(client, :post, "/2/users/{id}/muting",
-      params: %{
-        "id" => id
-      }
     )
   end
 
@@ -629,7 +79,8 @@ defmodule Xdk.Users do
   Retrieves details of the authenticated user.
 
   """
-  @spec get_me(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_me(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_me(client, opts \\ []) do
     query =
       [
@@ -637,253 +88,93 @@ defmodule Xdk.Users do
         {"expansions", Keyword.get(opts, :expansions)},
         {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/users/me", query: query)
   end
 
   @doc """
-  Get followers
+  Block DMs
 
-  GET /2/users/{id}/followers
+  POST /2/users/{id}/dm/block
 
-  Retrieves a list of Users who follow a specific User by their ID.
+  Blocks direct messages to or from a specific User by their ID for the authenticated user.
 
   """
-  @spec get_followers(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_followers(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+  @spec block_dms(Xdk.t(), id :: String.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
 
-    Xdk.request(client, :get, "/2/users/{id}/followers",
+  def block_dms(client, id) do
+    Xdk.request(client, :post, "/2/users/{id}/dm/block",
+      params: %{
+        "id" => id
+      }
+    )
+  end
+
+  @doc """
+  Like Post
+
+  POST /2/users/{id}/likes
+
+  Causes the authenticated user to Like a specific Post by its ID.
+
+  """
+  @spec like_post(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def like_post(client, id, body) do
+    Xdk.request(client, :post, "/2/users/{id}/likes",
       params: %{
         "id" => id
       },
-      query: query
+      json: body
     )
   end
 
   @doc """
-  Unlike Post
+  Get User by ID
 
-  DELETE /2/users/{id}/likes/{tweet_id}
+  GET /2/users/{id}
 
-  Causes the authenticated user to Unlike a specific Post by its ID.
-
-  """
-  @spec unlike_post(Xdk.t(), id :: any(), tweet_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def unlike_post(client, id, tweet_id) do
-    Xdk.request(client, :delete, "/2/users/{id}/likes/{tweet_id}",
-      params: %{
-        "id" => id,
-        "tweet_id" => tweet_id
-      }
-    )
-  end
-
-  @doc """
-  Get Reposts of me
-
-  GET /2/users/reposts_of_me
-
-  Retrieves a list of Posts that repost content from the authenticated user.
+  Retrieves details of a specific User by their ID.
 
   """
-  @spec get_reposts_of_me(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_reposts_of_me(client, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+  @spec get_by_id(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
 
-    Xdk.request(client, :get, "/2/users/reposts_of_me", query: query)
-  end
-
-  @doc """
-  Search Users
-
-  GET /2/users/search
-
-  Retrieves a list of Users matching a search query.
-
-  """
-  @spec search(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def search(client, opts \\ []) do
-    query =
-      [
-        {"query", Keyword.get(opts, :query)},
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"next_token", Keyword.get(opts, :next_token)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/search", query: query)
-  end
-
-  @doc """
-  Unfollow List
-
-  DELETE /2/users/{id}/followed_lists/{list_id}
-
-  Causes the authenticated user to unfollow a specific List by its ID.
-
-  """
-  @spec unfollow_list(Xdk.t(), id :: any(), list_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def unfollow_list(client, id, list_id) do
-    Xdk.request(client, :delete, "/2/users/{id}/followed_lists/{list_id}",
-      params: %{
-        "id" => id,
-        "list_id" => list_id
-      }
-    )
-  end
-
-  @doc """
-  Get User by username
-
-  GET /2/users/by/username/{username}
-
-  Retrieves details of a specific User by their username.
-
-  """
-  @spec get_by_username(Xdk.t(), username :: String.t(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_by_username(client, username, opts \\ []) do
+  def get_by_id(client, id, opts \\ []) do
     query =
       [
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"expansions", Keyword.get(opts, :expansions)},
         {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/users/by/username/{username}",
+    Xdk.request(client, :get, "/2/users/{id}",
       params: %{
-        "username" => username
+        "id" => id
       },
       query: query
     )
   end
 
   @doc """
-  Delete Bookmark
+  Unrepost Post
 
-  DELETE /2/users/{id}/bookmarks/{tweet_id}
+  DELETE /2/users/{id}/retweets/{source_tweet_id}
 
-  Removes a Post from the authenticated user’s Bookmarks by its ID.
+  Causes the authenticated user to unrepost a specific Post by its ID.
 
   """
-  @spec delete_bookmark(Xdk.t(), id :: any(), tweet_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def delete_bookmark(client, id, tweet_id) do
-    Xdk.request(client, :delete, "/2/users/{id}/bookmarks/{tweet_id}",
+  @spec unrepost_post(Xdk.t(), id :: String.t(), source_tweet_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def unrepost_post(client, id, source_tweet_id) do
+    Xdk.request(client, :delete, "/2/users/{id}/retweets/{source_tweet_id}",
       params: %{
         "id" => id,
-        "tweet_id" => tweet_id
-      }
-    )
-  end
-
-  @doc """
-  Get Timeline
-
-  GET /2/users/{id}/timelines/reverse_chronological
-
-  Retrieves a reverse chronological list of Posts in the authenticated User’s Timeline.
-
-  """
-  @spec get_timeline(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_timeline(client, id, opts \\ []) do
-    query =
-      [
-        {"since_id", Keyword.get(opts, :since_id)},
-        {"until_id", Keyword.get(opts, :until_id)},
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"exclude", Keyword.get(opts, :exclude)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"poll.fields", Keyword.get(opts, :poll_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"place.fields", Keyword.get(opts, :place_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/timelines/reverse_chronological",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Get followed Lists
-
-  GET /2/users/{id}/followed_lists
-
-  Retrieves a list of Lists followed by a specific User by their ID.
-
-  """
-  @spec get_followed_lists(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_followed_lists(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"list.fields", Keyword.get(opts, :list_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"user.fields", Keyword.get(opts, :user_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/users/{id}/followed_lists",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
-  Follow List
-
-  POST /2/users/{id}/followed_lists
-
-  Causes the authenticated user to follow a specific List by its ID.
-
-  """
-  @spec follow_list(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def follow_list(client, id) do
-    Xdk.request(client, :post, "/2/users/{id}/followed_lists",
-      params: %{
-        "id" => id
+        "source_tweet_id" => source_tweet_id
       }
     )
   end
@@ -896,8 +187,9 @@ defmodule Xdk.Users do
   Retrieves a list of Posts bookmarked by the authenticated user.
 
   """
-  @spec get_bookmarks(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+  @spec get_bookmarks(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_bookmarks(client, id, opts \\ []) do
     query =
       [
@@ -910,7 +202,7 @@ defmodule Xdk.Users do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/users/{id}/bookmarks",
       params: %{
@@ -928,12 +220,775 @@ defmodule Xdk.Users do
   Adds a post to the authenticated user’s bookmarks.
 
   """
-  @spec create_bookmark(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def create_bookmark(client, id) do
+  @spec create_bookmark(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def create_bookmark(client, id, body) do
     Xdk.request(client, :post, "/2/users/{id}/bookmarks",
       params: %{
         "id" => id
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Unmute User
+
+  DELETE /2/users/{source_user_id}/muting/{target_user_id}
+
+  Causes the authenticated user to unmute a specific user by their ID.
+
+  """
+  @spec unmute_user(Xdk.t(), source_user_id :: String.t(), target_user_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def unmute_user(client, source_user_id, target_user_id) do
+    Xdk.request(client, :delete, "/2/users/{source_user_id}/muting/{target_user_id}",
+      params: %{
+        "source_user_id" => source_user_id,
+        "target_user_id" => target_user_id
       }
+    )
+  end
+
+  @doc """
+  Get owned Lists
+
+  GET /2/users/{id}/owned_lists
+
+  Retrieves a list of Lists owned by a specific User by their ID.
+
+  """
+  @spec get_owned_lists(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_owned_lists(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"list.fields", Keyword.get(opts, :list_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"user.fields", Keyword.get(opts, :user_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/owned_lists",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Unpin List
+
+  DELETE /2/users/{id}/pinned_lists/{list_id}
+
+  Causes the authenticated user to unpin a specific List by its ID.
+
+  """
+  @spec unpin_list(Xdk.t(), id :: String.t(), list_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def unpin_list(client, id, list_id) do
+    Xdk.request(client, :delete, "/2/users/{id}/pinned_lists/{list_id}",
+      params: %{
+        "id" => id,
+        "list_id" => list_id
+      }
+    )
+  end
+
+  @doc """
+  Repost Post
+
+  POST /2/users/{id}/retweets
+
+  Causes the authenticated user to repost a specific Post by its ID.
+
+  """
+  @spec repost_post(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def repost_post(client, id, body) do
+    Xdk.request(client, :post, "/2/users/{id}/retweets",
+      params: %{
+        "id" => id
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Delete Bookmark
+
+  DELETE /2/users/{id}/bookmarks/{tweet_id}
+
+  Removes a Post from the authenticated user’s Bookmarks by its ID.
+
+  """
+  @spec delete_bookmark(Xdk.t(), id :: String.t(), tweet_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def delete_bookmark(client, id, tweet_id) do
+    Xdk.request(client, :delete, "/2/users/{id}/bookmarks/{tweet_id}",
+      params: %{
+        "id" => id,
+        "tweet_id" => tweet_id
+      }
+    )
+  end
+
+  @doc """
+  Get Bookmarks by folder ID
+
+  GET /2/users/{id}/bookmarks/folders/{folder_id}
+
+  Retrieves Posts in a specific Bookmark folder by its ID for the authenticated user.
+
+  """
+  @spec get_bookmarks_by_folder_id(Xdk.t(), id :: String.t(), folder_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_bookmarks_by_folder_id(client, id, folder_id) do
+    Xdk.request(client, :get, "/2/users/{id}/bookmarks/folders/{folder_id}",
+      params: %{
+        "id" => id,
+        "folder_id" => folder_id
+      }
+    )
+  end
+
+  @doc """
+  Get Timeline
+
+  GET /2/users/{id}/timelines/reverse_chronological
+
+  Retrieves a reverse chronological list of Posts in the authenticated User’s Timeline.
+
+  """
+  @spec get_timeline(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_timeline(client, id, opts \\ []) do
+    query =
+      [
+        {"since_id", Keyword.get(opts, :since_id)},
+        {"until_id", Keyword.get(opts, :until_id)},
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"exclude", Keyword.get(opts, :exclude)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/timelines/reverse_chronological",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Search Users
+
+  GET /2/users/search
+
+  Retrieves a list of Users matching a search query.
+
+  """
+  @spec search(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def search(client, opts \\ []) do
+    query =
+      [
+        {"query", Keyword.get(opts, :query)},
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"next_token", Keyword.get(opts, :next_token)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/search", query: query)
+  end
+
+  @doc """
+  Get affiliates
+
+  GET /2/users/{id}/affiliates
+
+  Retrieves a list of Users who are affiliated with a specific organization User by their ID.
+
+  """
+  @spec get_affiliates(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_affiliates(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/affiliates",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Get Bookmark folders
+
+  GET /2/users/{id}/bookmarks/folders
+
+  Retrieves a list of Bookmark folders created by the authenticated user.
+
+  """
+  @spec get_bookmark_folders(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_bookmark_folders(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/bookmarks/folders",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Get User by username
+
+  GET /2/users/by/username/{username}
+
+  Retrieves details of a specific User by their username.
+
+  """
+  @spec get_by_username(Xdk.t(), username :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_by_username(client, username, opts \\ []) do
+    query =
+      [
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/by/username/{username}",
+      params: %{
+        "username" => username
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Unblock DMs
+
+  POST /2/users/{id}/dm/unblock
+
+  Unblocks direct messages to or from a specific User by their ID for the authenticated user.
+
+  """
+  @spec unblock_dms(Xdk.t(), id :: String.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def unblock_dms(client, id) do
+    Xdk.request(client, :post, "/2/users/{id}/dm/unblock",
+      params: %{
+        "id" => id
+      }
+    )
+  end
+
+  @doc """
+  Unfollow List
+
+  DELETE /2/users/{id}/followed_lists/{list_id}
+
+  Causes the authenticated user to unfollow a specific List by its ID.
+
+  """
+  @spec unfollow_list(Xdk.t(), id :: String.t(), list_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def unfollow_list(client, id, list_id) do
+    Xdk.request(client, :delete, "/2/users/{id}/followed_lists/{list_id}",
+      params: %{
+        "id" => id,
+        "list_id" => list_id
+      }
+    )
+  end
+
+  @doc """
+  Get Users by IDs
+
+  GET /2/users
+
+  Retrieves details of multiple Users by their IDs.
+
+  """
+  @spec get_by_ids(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_by_ids(client, opts \\ []) do
+    query =
+      [
+        {"ids", Keyword.get(opts, :ids)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users", query: query)
+  end
+
+  @doc """
+  Get following
+
+  GET /2/users/{id}/following
+
+  Retrieves a list of Users followed by a specific User by their ID.
+
+  """
+  @spec get_following(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_following(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/following",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Follow User
+
+  POST /2/users/{id}/following
+
+  Causes the authenticated user to follow a specific user by their ID.
+
+  """
+  @spec follow_user(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def follow_user(client, id, body) do
+    Xdk.request(client, :post, "/2/users/{id}/following",
+      params: %{
+        "id" => id
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Get liked Posts
+
+  GET /2/users/{id}/liked_tweets
+
+  Retrieves a list of Posts liked by a specific User by their ID.
+
+  """
+  @spec get_liked_posts(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_liked_posts(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/liked_tweets",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Get Users by usernames
+
+  GET /2/users/by
+
+  Retrieves details of multiple Users by their usernames.
+
+  """
+  @spec get_by_usernames(Xdk.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_by_usernames(client, opts \\ []) do
+    query =
+      [
+        {"usernames", Keyword.get(opts, :usernames)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/by", query: query)
+  end
+
+  @doc """
+  Unlike Post
+
+  DELETE /2/users/{id}/likes/{tweet_id}
+
+  Causes the authenticated user to Unlike a specific Post by its ID.
+
+  """
+  @spec unlike_post(Xdk.t(), id :: String.t(), tweet_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def unlike_post(client, id, tweet_id) do
+    Xdk.request(client, :delete, "/2/users/{id}/likes/{tweet_id}",
+      params: %{
+        "id" => id,
+        "tweet_id" => tweet_id
+      }
+    )
+  end
+
+  @doc """
+  Get pinned Lists
+
+  GET /2/users/{id}/pinned_lists
+
+  Retrieves a list of Lists pinned by the authenticated user.
+
+  """
+  @spec get_pinned_lists(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_pinned_lists(client, id, opts \\ []) do
+    query =
+      [
+        {"list.fields", Keyword.get(opts, :list_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"user.fields", Keyword.get(opts, :user_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/pinned_lists",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Pin List
+
+  POST /2/users/{id}/pinned_lists
+
+  Causes the authenticated user to pin a specific List by its ID.
+
+  """
+  @spec pin_list(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def pin_list(client, id, body) do
+    Xdk.request(client, :post, "/2/users/{id}/pinned_lists",
+      params: %{
+        "id" => id
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Get blocking
+
+  GET /2/users/{id}/blocking
+
+  Retrieves a list of Users blocked by the specified User ID.
+
+  """
+  @spec get_blocking(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_blocking(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/blocking",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Unfollow User
+
+  DELETE /2/users/{source_user_id}/following/{target_user_id}
+
+  Causes the authenticated user to unfollow a specific user by their ID.
+
+  """
+  @spec unfollow_user(Xdk.t(), source_user_id :: String.t(), target_user_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def unfollow_user(client, source_user_id, target_user_id) do
+    Xdk.request(client, :delete, "/2/users/{source_user_id}/following/{target_user_id}",
+      params: %{
+        "source_user_id" => source_user_id,
+        "target_user_id" => target_user_id
+      }
+    )
+  end
+
+  @doc """
+  Get List memberships
+
+  GET /2/users/{id}/list_memberships
+
+  Retrieves a list of Lists that a specific User is a member of by their ID.
+
+  """
+  @spec get_list_memberships(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_list_memberships(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"list.fields", Keyword.get(opts, :list_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"user.fields", Keyword.get(opts, :user_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/list_memberships",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Get muting
+
+  GET /2/users/{id}/muting
+
+  Retrieves a list of Users muted by the authenticated user.
+
+  """
+  @spec get_muting(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_muting(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/muting",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Mute User
+
+  POST /2/users/{id}/muting
+
+  Causes the authenticated user to mute a specific User by their ID.
+
+  """
+  @spec mute_user(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def mute_user(client, id, body) do
+    Xdk.request(client, :post, "/2/users/{id}/muting",
+      params: %{
+        "id" => id
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Get Reposts of me
+
+  GET /2/users/reposts_of_me
+
+  Retrieves a list of Posts that repost content from the authenticated user.
+
+  """
+  @spec get_reposts_of_me(Xdk.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_reposts_of_me(client, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/reposts_of_me", query: query)
+  end
+
+  @doc """
+  Get followed Lists
+
+  GET /2/users/{id}/followed_lists
+
+  Retrieves a list of Lists followed by a specific User by their ID.
+
+  """
+  @spec get_followed_lists(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_followed_lists(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"list.fields", Keyword.get(opts, :list_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"user.fields", Keyword.get(opts, :user_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/followed_lists",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
+  Follow List
+
+  POST /2/users/{id}/followed_lists
+
+  Causes the authenticated user to follow a specific List by its ID.
+
+  """
+  @spec follow_list(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def follow_list(client, id, body) do
+    Xdk.request(client, :post, "/2/users/{id}/followed_lists",
+      params: %{
+        "id" => id
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Get Posts
+
+  GET /2/users/{id}/tweets
+
+  Retrieves a list of posts authored by a specific User by their ID.
+
+  """
+  @spec get_posts(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_posts(client, id, opts \\ []) do
+    query =
+      [
+        {"since_id", Keyword.get(opts, :since_id)},
+        {"until_id", Keyword.get(opts, :until_id)},
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"exclude", Keyword.get(opts, :exclude)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"poll.fields", Keyword.get(opts, :poll_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"place.fields", Keyword.get(opts, :place_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/users/{id}/tweets",
+      params: %{
+        "id" => id
+      },
+      query: query
     )
   end
 end

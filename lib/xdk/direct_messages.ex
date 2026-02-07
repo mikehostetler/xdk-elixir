@@ -12,7 +12,8 @@ defmodule Xdk.DirectMessages do
   Retrieves a list of recent direct message events across all conversations.
 
   """
-  @spec get_events(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_events(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_events(client, opts \\ []) do
     query =
       [
@@ -25,40 +26,28 @@ defmodule Xdk.DirectMessages do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/dm_events", query: query)
   end
 
   @doc """
-  Get DM events for a DM conversation
+  Create DM message by participant ID
 
-  GET /2/dm_conversations/{id}/dm_events
+  POST /2/dm_conversations/with/{participant_id}/messages
 
-  Retrieves direct message events for a specific conversation.
+  Sends a new direct message to a specific participant by their ID.
 
   """
-  @spec get_events_by_conversation_id(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_events_by_conversation_id(client, id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"event_types", Keyword.get(opts, :event_types)},
-        {"dm_event.fields", Keyword.get(opts, :dm_event_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"media.fields", Keyword.get(opts, :media_fields)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+  @spec create_by_participant_id(Xdk.t(), participant_id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
 
-    Xdk.request(client, :get, "/2/dm_conversations/{id}/dm_events",
+  def create_by_participant_id(client, participant_id, body) do
+    Xdk.request(client, :post, "/2/dm_conversations/with/{participant_id}/messages",
       params: %{
-        "id" => id
+        "participant_id" => participant_id
       },
-      query: query
+      json: body
     )
   end
 
@@ -70,8 +59,9 @@ defmodule Xdk.DirectMessages do
   Retrieves details of a specific direct message event by its ID.
 
   """
-  @spec get_events_by_id(Xdk.t(), event_id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+  @spec get_events_by_id(Xdk.t(), event_id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_events_by_id(client, event_id, opts \\ []) do
     query =
       [
@@ -81,7 +71,7 @@ defmodule Xdk.DirectMessages do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/dm_events/{event_id}",
       params: %{
@@ -99,12 +89,67 @@ defmodule Xdk.DirectMessages do
   Deletes a specific direct message event by its ID, if owned by the authenticated user.
 
   """
-  @spec delete_events(Xdk.t(), event_id :: any()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec delete_events(Xdk.t(), event_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def delete_events(client, event_id) do
     Xdk.request(client, :delete, "/2/dm_events/{event_id}",
       params: %{
         "event_id" => event_id
       }
+    )
+  end
+
+  @doc """
+  Create DM message by conversation ID
+
+  POST /2/dm_conversations/{dm_conversation_id}/messages
+
+  Sends a new direct message to a specific conversation by its ID.
+
+  """
+  @spec create_by_conversation_id(Xdk.t(), dm_conversation_id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def create_by_conversation_id(client, dm_conversation_id, body) do
+    Xdk.request(client, :post, "/2/dm_conversations/{dm_conversation_id}/messages",
+      params: %{
+        "dm_conversation_id" => dm_conversation_id
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Get DM events for a DM conversation
+
+  GET /2/dm_conversations/{id}/dm_events
+
+  Retrieves direct message events for a specific conversation.
+
+  """
+  @spec get_events_by_conversation_id(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_events_by_conversation_id(client, id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"event_types", Keyword.get(opts, :event_types)},
+        {"dm_event.fields", Keyword.get(opts, :dm_event_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"media.fields", Keyword.get(opts, :media_fields)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"tweet.fields", Keyword.get(opts, :tweet_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/dm_conversations/{id}/dm_events",
+      params: %{
+        "id" => id
+      },
+      query: query
     )
   end
 
@@ -116,27 +161,10 @@ defmodule Xdk.DirectMessages do
   Initiates a new direct message conversation with specified participants.
 
   """
-  @spec create_conversation(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def create_conversation(client) do
-    Xdk.request(client, :post, "/2/dm_conversations")
-  end
+  @spec create_conversation(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
 
-  @doc """
-  Create DM message by participant ID
-
-  POST /2/dm_conversations/with/{participant_id}/messages
-
-  Sends a new direct message to a specific participant by their ID.
-
-  """
-  @spec create_by_participant_id(Xdk.t(), participant_id :: any()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def create_by_participant_id(client, participant_id) do
-    Xdk.request(client, :post, "/2/dm_conversations/with/{participant_id}/messages",
-      params: %{
-        "participant_id" => participant_id
-      }
-    )
+  def create_conversation(client, body) do
+    Xdk.request(client, :post, "/2/dm_conversations", json: body)
   end
 
   @doc """
@@ -147,8 +175,9 @@ defmodule Xdk.DirectMessages do
   Retrieves direct message events for a specific conversation.
 
   """
-  @spec get_events_by_participant_id(Xdk.t(), participant_id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+  @spec get_events_by_participant_id(Xdk.t(), participant_id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_events_by_participant_id(client, participant_id, opts \\ []) do
     query =
       [
@@ -161,31 +190,13 @@ defmodule Xdk.DirectMessages do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/dm_conversations/with/{participant_id}/dm_events",
       params: %{
         "participant_id" => participant_id
       },
       query: query
-    )
-  end
-
-  @doc """
-  Create DM message by conversation ID
-
-  POST /2/dm_conversations/{dm_conversation_id}/messages
-
-  Sends a new direct message to a specific conversation by its ID.
-
-  """
-  @spec create_by_conversation_id(Xdk.t(), dm_conversation_id :: String.t()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def create_by_conversation_id(client, dm_conversation_id) do
-    Xdk.request(client, :post, "/2/dm_conversations/{dm_conversation_id}/messages",
-      params: %{
-        "dm_conversation_id" => dm_conversation_id
-      }
     )
   end
 end

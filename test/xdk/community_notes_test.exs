@@ -3,22 +3,16 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.CommunityNotesTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.CommunityNotes)
     end
 
-    test "create function exists" do
+    test "delete function exists" do
       Code.ensure_loaded!(Xdk.CommunityNotes)
-      assert function_exported?(Xdk.CommunityNotes, :create, 1)
-    end
-
-    test "search_eligible_posts function exists" do
-      Code.ensure_loaded!(Xdk.CommunityNotes)
-
-      assert function_exported?(Xdk.CommunityNotes, :search_eligible_posts, 1) or
-               function_exported?(Xdk.CommunityNotes, :search_eligible_posts, 2)
+      assert function_exported?(Xdk.CommunityNotes, :delete, 2)
     end
 
     test "search_written function exists" do
@@ -28,14 +22,166 @@ defmodule Xdk.CommunityNotesTest do
                function_exported?(Xdk.CommunityNotes, :search_written, 2)
     end
 
-    test "delete function exists" do
-      Code.ensure_loaded!(Xdk.CommunityNotes)
-      assert function_exported?(Xdk.CommunityNotes, :delete, 2)
-    end
-
     test "evaluate function exists" do
       Code.ensure_loaded!(Xdk.CommunityNotes)
-      assert function_exported?(Xdk.CommunityNotes, :evaluate, 1)
+      assert function_exported?(Xdk.CommunityNotes, :evaluate, 2)
+    end
+
+    test "create function exists" do
+      Code.ensure_loaded!(Xdk.CommunityNotes)
+      assert function_exported?(Xdk.CommunityNotes, :create, 2)
+    end
+
+    test "search_eligible_posts function exists" do
+      Code.ensure_loaded!(Xdk.CommunityNotes)
+
+      assert function_exported?(Xdk.CommunityNotes, :search_eligible_posts, 1) or
+               function_exported?(Xdk.CommunityNotes, :search_eligible_posts, 2)
+    end
+  end
+
+  describe "delete/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/notes/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.CommunityNotes.delete(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/notes/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.CommunityNotes.delete(client, "test_id")
+    end
+  end
+
+  describe "search_written/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/notes/search/notes_written", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.CommunityNotes.search_written(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/notes/search/notes_written", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.CommunityNotes.search_written(client)
+    end
+  end
+
+  describe "evaluate/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/evaluate_note", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.CommunityNotes.evaluate(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/evaluate_note", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.CommunityNotes.evaluate(client, %{})
+    end
+  end
+
+  describe "create/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/notes", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.CommunityNotes.create(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/notes", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.CommunityNotes.create(client, %{})
+    end
+  end
+
+  describe "search_eligible_posts/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/notes/search/posts_eligible_for_notes", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.CommunityNotes.search_eligible_posts(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/notes/search/posts_eligible_for_notes", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.CommunityNotes.search_eligible_posts(client)
     end
   end
 end

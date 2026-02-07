@@ -13,64 +13,137 @@ defmodule Xdk do
   defstruct [
     :base_url,
     :finch,
-    :bearer,
-    :headers
+    :auth,
+    :headers,
+    :request_opts
   ]
+
+  @type auth :: nil | {:bearer, String.t()} | {:oauth2, map()}
 
   @type t :: %__MODULE__{
           base_url: String.t(),
-          finch: atom(),
-          bearer: String.t() | nil,
-          headers: [{String.t(), String.t()}]
+          finch: atom() | nil,
+          auth: auth(),
+          headers: [{String.t(), String.t()}],
+          request_opts: keyword()
         }
 
   @spec new(keyword()) :: t()
   def new(opts \\ []) do
+    defaults = Application.get_env(:xdk, :default_config, [])
+    opts = Keyword.merge(defaults, opts)
+
     %__MODULE__{
       base_url: Keyword.get(opts, :base_url, "https://api.x.com"),
-      finch: Keyword.get(opts, :finch, Xdk.Finch),
-      bearer: Keyword.get(opts, :bearer),
-      headers: Keyword.get(opts, :headers, [])
+      finch: Keyword.get(opts, :finch),
+      auth: resolve_auth(opts),
+      headers: Keyword.get(opts, :headers, []),
+      request_opts: Keyword.get(opts, :request_opts, [])
     }
   end
 
+  @doc """
+  Returns a child spec for a Finch pool suitable for the X API.
+
+  Add to your supervision tree:
+
+      children = [
+        Xdk.child_spec(name: MyApp.XFinch),
+        ...
+      ]
+
+  Then: `Xdk.new(finch: MyApp.XFinch, auth: {:bearer, token})`
+  """
+  @spec child_spec(keyword()) :: Supervisor.child_spec()
+  def child_spec(opts) do
+    name = Keyword.fetch!(opts, :name)
+    pool_opts = Keyword.get(opts, :pools, %{})
+    Finch.child_spec(name: name, pools: pool_opts)
+  end
+
   @spec request(t(), atom(), String.t(), keyword()) ::
-          {:ok, term()} | {:error, Exception.t()}
+          {:ok, term()} | {:error, Xdk.Errors.error()}
   def request(%__MODULE__{} = client, method, path, opts \\ []) do
     params = Keyword.get(opts, :params, %{})
     query = Keyword.get(opts, :query, [])
-    body = Keyword.get(opts, :json)
+    json = Keyword.get(opts, :json)
+    raw_body = Keyword.get(opts, :body)
 
     url = client.base_url <> interpolate_path(path, params)
 
     url =
       case query do
         [] -> url
-        _ -> url <> "?" <> URI.encode_query(query)
+        _ -> url <> "?" <> Xdk.Query.encode(query)
       end
 
-    headers =
-      [{"user-agent", "xdk-elixir/#{@version}"}]
-      |> Kernel.++(client.headers)
-      |> maybe_add_bearer(client.bearer)
+    headers = build_headers(client, opts)
 
-    encoded_body =
-      case body do
-        nil -> nil
-        data -> Jason.encode!(data)
+    {encoded_body, headers} =
+      cond do
+        json != nil ->
+          case Jason.encode(json) do
+            {:ok, bin} -> {bin, [{"content-type", "application/json"} | headers]}
+            {:error, err} -> throw({:encode_error, err})
+          end
+
+        raw_body != nil ->
+          {raw_body, headers}
+
+        true ->
+          {nil, headers}
       end
 
-    headers =
-      if encoded_body do
-        [{"content-type", "application/json"} | headers]
-      else
-        headers
-      end
+    finch = require_finch!(client)
 
     method
     |> Finch.build(url, headers, encoded_body)
-    |> Finch.request(client.finch)
+    |> Finch.request(finch, client.request_opts)
     |> handle_response()
+  catch
+    {:encode_error, err} ->
+      {:error, Xdk.Errors.DecodeError.exception(error: err, raw_body: nil)}
+  end
+
+  @doc false
+  def require_finch!(%__MODULE__{finch: nil}) do
+    raise ArgumentError, """
+    Xdk requires a Finch pool name.
+
+    Start Finch in your application supervision tree:
+
+        children = [
+          {Finch, name: MyApp.Finch}
+        ]
+
+    Then create a client:
+
+        client = Xdk.new(finch: MyApp.Finch, auth: {:bearer, token})
+
+    Or set a default via application config:
+
+        config :xdk, :default_config, finch: MyApp.Finch
+    """
+  end
+
+  def require_finch!(%__MODULE__{finch: finch}), do: finch
+
+  @doc false
+  def build_finch_request(%__MODULE__{} = client, method, path, opts) do
+    params = Keyword.get(opts, :params, %{})
+    query = Keyword.get(opts, :query, [])
+
+    url = client.base_url <> interpolate_path(path, params)
+
+    url =
+      case query do
+        [] -> url
+        _ -> url <> "?" <> Xdk.Query.encode(query)
+      end
+
+    headers = build_headers(client, opts)
+
+    Finch.build(method, url, headers)
   end
 
   defp interpolate_path(path, params) do
@@ -79,38 +152,77 @@ defmodule Xdk do
     end)
   end
 
-  defp maybe_add_bearer(headers, nil), do: headers
-  defp maybe_add_bearer(headers, token), do: [{"authorization", "Bearer #{token}"} | headers]
+  defp resolve_auth(opts) do
+    case Keyword.get(opts, :auth) do
+      nil ->
+        case Keyword.get(opts, :bearer) do
+          nil -> nil
+          token -> {:bearer, token}
+        end
+
+      auth ->
+        auth
+    end
+  end
+
+  defp build_headers(%__MODULE__{} = client, opts) do
+    per_request_auth = Keyword.get(opts, :auth, client.auth)
+
+    [{"user-agent", "xdk-elixir/#{@version}"}]
+    |> Kernel.++(client.headers)
+    |> Kernel.++(Keyword.get(opts, :headers, []))
+    |> Kernel.++(auth_headers(per_request_auth))
+  end
+
+  defp auth_headers(nil), do: []
+  defp auth_headers({:bearer, token}), do: [{"authorization", "Bearer #{token}"}]
+  defp auth_headers({:oauth2, %{access_token: token}}), do: [{"authorization", "Bearer #{token}"}]
+
+  defp handle_response({:ok, %Finch.Response{status: 429, headers: headers, body: body}}) do
+    decoded = try_decode_body(body, headers)
+    {limit, remaining, reset, retry_after} = parse_rate_limit_headers(headers)
+
+    {:error,
+     Xdk.Errors.RateLimitError.exception(
+       status: 429,
+       body: decoded,
+       headers: headers,
+       limit: limit,
+       remaining: remaining,
+       reset: reset,
+       retry_after_ms: retry_after
+     )}
+  end
 
   defp handle_response({:ok, %Finch.Response{status: status, body: body, headers: headers}})
        when status in 200..299 do
-    case decode_body(body, headers) do
+    case try_decode_body(body, headers) do
       {:ok, decoded} -> {:ok, decoded}
-      {:error, reason} -> {:error, Xdk.Errors.Unknown.UnknownError.exception(error: reason)}
+      {:error, err} -> {:error, Xdk.Errors.DecodeError.exception(error: err, raw_body: body)}
     end
   end
 
   defp handle_response({:ok, %Finch.Response{status: status, body: body, headers: headers}}) do
     decoded =
-      case decode_body(body, headers) do
+      case try_decode_body(body, headers) do
         {:ok, d} -> d
         _ -> body
       end
 
-    {:error, Xdk.Errors.ApiError.exception(status: status, body: decoded)}
+    {:error, Xdk.Errors.ApiError.exception(status: status, body: decoded, headers: headers)}
   end
 
   defp handle_response({:error, reason}) do
     {:error, Xdk.Errors.TransportError.exception(reason: reason)}
   end
 
-  defp decode_body("", _headers), do: {:ok, nil}
-  defp decode_body(nil, _headers), do: {:ok, nil}
+  defp try_decode_body("", _), do: {:ok, nil}
+  defp try_decode_body(nil, _), do: {:ok, nil}
 
-  defp decode_body(body, headers) do
+  defp try_decode_body(body, headers) do
     content_type =
       Enum.find_value(headers, "", fn
-        {"content-type", v} -> v
+        {k, v} when k in ["content-type", "Content-Type"] -> v
         _ -> nil
       end)
 
@@ -118,6 +230,36 @@ defmodule Xdk do
       Jason.decode(body)
     else
       {:ok, body}
+    end
+  end
+
+  defp parse_rate_limit_headers(headers) do
+    get = fn name ->
+      Enum.find_value(headers, fn
+        {k, v} when k == name -> v
+        _ -> nil
+      end)
+    end
+
+    limit = parse_int(get.("x-rate-limit-limit"))
+    remaining = parse_int(get.("x-rate-limit-remaining"))
+    reset = parse_int(get.("x-rate-limit-reset"))
+
+    retry_after =
+      case reset do
+        nil -> nil
+        unix -> max(0, (unix - System.system_time(:second)) * 1000)
+      end
+
+    {limit, remaining, reset, retry_after}
+  end
+
+  defp parse_int(nil), do: nil
+
+  defp parse_int(s) when is_binary(s) do
+    case Integer.parse(s) do
+      {n, _} -> n
+      :error -> nil
     end
   end
 end

@@ -3,20 +3,11 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.ConnectionsTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Connections)
-    end
-
-    test "delete_all function exists" do
-      Code.ensure_loaded!(Xdk.Connections)
-      assert function_exported?(Xdk.Connections, :delete_all, 1)
-    end
-
-    test "delete_by_endpoint function exists" do
-      Code.ensure_loaded!(Xdk.Connections)
-      assert function_exported?(Xdk.Connections, :delete_by_endpoint, 2)
     end
 
     test "get_connection_history function exists" do
@@ -28,7 +19,133 @@ defmodule Xdk.ConnectionsTest do
 
     test "delete_by_uuids function exists" do
       Code.ensure_loaded!(Xdk.Connections)
-      assert function_exported?(Xdk.Connections, :delete_by_uuids, 1)
+      assert function_exported?(Xdk.Connections, :delete_by_uuids, 2)
+    end
+
+    test "delete_by_endpoint function exists" do
+      Code.ensure_loaded!(Xdk.Connections)
+      assert function_exported?(Xdk.Connections, :delete_by_endpoint, 2)
+    end
+
+    test "delete_all function exists" do
+      Code.ensure_loaded!(Xdk.Connections)
+      assert function_exported?(Xdk.Connections, :delete_all, 1)
+    end
+  end
+
+  describe "get_connection_history/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/connections", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Connections.get_connection_history(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/connections", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Connections.get_connection_history(client)
+    end
+  end
+
+  describe "delete_by_uuids/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/connections", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Connections.delete_by_uuids(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/connections", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Connections.delete_by_uuids(client, %{})
+    end
+  end
+
+  describe "delete_by_endpoint/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/connections/test_endpoint_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Connections.delete_by_endpoint(client, "test_endpoint_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/connections/test_endpoint_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Connections.delete_by_endpoint(client, "test_endpoint_id")
+    end
+  end
+
+  describe "delete_all/1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/connections/all", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Connections.delete_all(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/connections/all", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Connections.delete_all(client)
     end
   end
 end

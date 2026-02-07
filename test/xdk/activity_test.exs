@@ -3,6 +3,7 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.ActivityTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
@@ -16,6 +17,16 @@ defmodule Xdk.ActivityTest do
                function_exported?(Xdk.Activity, :stream, 2)
     end
 
+    test "update_subscription function exists" do
+      Code.ensure_loaded!(Xdk.Activity)
+      assert function_exported?(Xdk.Activity, :update_subscription, 3)
+    end
+
+    test "delete_subscription function exists" do
+      Code.ensure_loaded!(Xdk.Activity)
+      assert function_exported?(Xdk.Activity, :delete_subscription, 2)
+    end
+
     test "get_subscriptions function exists" do
       Code.ensure_loaded!(Xdk.Activity)
 
@@ -25,17 +36,143 @@ defmodule Xdk.ActivityTest do
 
     test "create_subscription function exists" do
       Code.ensure_loaded!(Xdk.Activity)
-      assert function_exported?(Xdk.Activity, :create_subscription, 1)
+      assert function_exported?(Xdk.Activity, :create_subscription, 2)
+    end
+  end
+
+  describe "update_subscription/3" do
+    setup do
+      setup_client()
     end
 
-    test "update_subscription function exists" do
-      Code.ensure_loaded!(Xdk.Activity)
-      assert function_exported?(Xdk.Activity, :update_subscription, 2)
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "PUT",
+        "/2/activity/subscriptions/test_subscription_id",
+        fn conn ->
+          assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(200, ~s({"data":{}}))
+        end
+      )
+
+      Xdk.Activity.update_subscription(client, "test_subscription_id", %{})
     end
 
-    test "delete_subscription function exists" do
-      Code.ensure_loaded!(Xdk.Activity)
-      assert function_exported?(Xdk.Activity, :delete_subscription, 2)
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "PUT",
+        "/2/activity/subscriptions/test_subscription_id",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+        end
+      )
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Activity.update_subscription(client, "test_subscription_id", %{})
+    end
+  end
+
+  describe "delete_subscription/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "DELETE",
+        "/2/activity/subscriptions/test_subscription_id",
+        fn conn ->
+          assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(200, ~s({"data":{}}))
+        end
+      )
+
+      Xdk.Activity.delete_subscription(client, "test_subscription_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "DELETE",
+        "/2/activity/subscriptions/test_subscription_id",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+        end
+      )
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Activity.delete_subscription(client, "test_subscription_id")
+    end
+  end
+
+  describe "get_subscriptions/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/activity/subscriptions", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Activity.get_subscriptions(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/activity/subscriptions", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Activity.get_subscriptions(client)
+    end
+  end
+
+  describe "create_subscription/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/activity/subscriptions", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Activity.create_subscription(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/activity/subscriptions", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Activity.create_subscription(client, %{})
     end
   end
 end

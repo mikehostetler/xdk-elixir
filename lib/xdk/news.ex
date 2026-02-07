@@ -5,30 +5,6 @@ defmodule Xdk.News do
   @moduledoc "Auto-generated client for news operations"
 
   @doc """
-  Get news stories by ID
-
-  GET /2/news/{id}
-
-  Retrieves news story by its ID.
-
-  """
-  @spec get(Xdk.t(), id :: any(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get(client, id, opts \\ []) do
-    query =
-      [
-        {"news.fields", Keyword.get(opts, :news_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/news/{id}",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
-  end
-
-  @doc """
   Search News
 
   GET /2/news/search
@@ -36,7 +12,8 @@ defmodule Xdk.News do
   Retrieves a list of News stories matching the specified search query.
 
   """
-  @spec search(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec search(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def search(client, opts \\ []) do
     query =
       [
@@ -45,8 +22,34 @@ defmodule Xdk.News do
         {"max_age_hours", Keyword.get(opts, :max_age_hours)},
         {"news.fields", Keyword.get(opts, :news_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/news/search", query: query)
+  end
+
+  @doc """
+  Get news stories by ID
+
+  GET /2/news/{id}
+
+  Retrieves news story by its ID.
+
+  """
+  @spec get(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get(client, id, opts \\ []) do
+    query =
+      [
+        {"news.fields", Keyword.get(opts, :news_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/news/{id}",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
   end
 end

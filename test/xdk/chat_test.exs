@@ -3,17 +3,11 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.ChatTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Chat)
-    end
-
-    test "get_conversation function exists" do
-      Code.ensure_loaded!(Xdk.Chat)
-
-      assert function_exported?(Xdk.Chat, :get_conversation, 2) or
-               function_exported?(Xdk.Chat, :get_conversation, 3)
     end
 
     test "get_user_public_keys function exists" do
@@ -25,12 +19,19 @@ defmodule Xdk.ChatTest do
 
     test "add_user_public_key function exists" do
       Code.ensure_loaded!(Xdk.Chat)
-      assert function_exported?(Xdk.Chat, :add_user_public_key, 2)
+      assert function_exported?(Xdk.Chat, :add_user_public_key, 3)
     end
 
     test "send_message function exists" do
       Code.ensure_loaded!(Xdk.Chat)
-      assert function_exported?(Xdk.Chat, :send_message, 2)
+      assert function_exported?(Xdk.Chat, :send_message, 3)
+    end
+
+    test "get_conversation function exists" do
+      Code.ensure_loaded!(Xdk.Chat)
+
+      assert function_exported?(Xdk.Chat, :get_conversation, 2) or
+               function_exported?(Xdk.Chat, :get_conversation, 3)
     end
 
     test "get_conversations function exists" do
@@ -38,6 +39,161 @@ defmodule Xdk.ChatTest do
 
       assert function_exported?(Xdk.Chat, :get_conversations, 1) or
                function_exported?(Xdk.Chat, :get_conversations, 2)
+    end
+  end
+
+  describe "get_user_public_keys/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/users/test_id/public_keys", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Chat.get_user_public_keys(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/users/test_id/public_keys", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Chat.get_user_public_keys(client, "test_id")
+    end
+  end
+
+  describe "add_user_public_key/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/users/test_id/public_keys", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Chat.add_user_public_key(client, "test_id", %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/users/test_id/public_keys", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Chat.add_user_public_key(client, "test_id", %{})
+    end
+  end
+
+  describe "send_message/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "POST",
+        "/2/chat/conversations/test_conversation_id/messages",
+        fn conn ->
+          assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(200, ~s({"data":{}}))
+        end
+      )
+
+      Xdk.Chat.send_message(client, "test_conversation_id", %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "POST",
+        "/2/chat/conversations/test_conversation_id/messages",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+        end
+      )
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Chat.send_message(client, "test_conversation_id", %{})
+    end
+  end
+
+  describe "get_conversation/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/chat/conversations/test_conversation_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Chat.get_conversation(client, "test_conversation_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/chat/conversations/test_conversation_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Chat.get_conversation(client, "test_conversation_id")
+    end
+  end
+
+  describe "get_conversations/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/chat/conversations", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Chat.get_conversations(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/chat/conversations", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Chat.get_conversations(client)
     end
   end
 end

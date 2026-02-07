@@ -5,6 +5,57 @@ defmodule Xdk.Spaces do
   @moduledoc "Auto-generated client for spaces operations"
 
   @doc """
+  Search Spaces
+
+  GET /2/spaces/search
+
+  Retrieves a list of Spaces matching the specified search query.
+
+  """
+  @spec search(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def search(client, opts \\ []) do
+    query =
+      [
+        {"query", Keyword.get(opts, :query)},
+        {"state", Keyword.get(opts, :state)},
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"space.fields", Keyword.get(opts, :space_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"topic.fields", Keyword.get(opts, :topic_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/spaces/search", query: query)
+  end
+
+  @doc """
+  Get Spaces by creator IDs
+
+  GET /2/spaces/by/creator_ids
+
+  Retrieves details of Spaces created by specified User IDs.
+
+  """
+  @spec get_by_creator_ids(Xdk.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_by_creator_ids(client, opts \\ []) do
+    query =
+      [
+        {"user_ids", Keyword.get(opts, :user_ids)},
+        {"space.fields", Keyword.get(opts, :space_fields)},
+        {"expansions", Keyword.get(opts, :expansions)},
+        {"user.fields", Keyword.get(opts, :user_fields)},
+        {"topic.fields", Keyword.get(opts, :topic_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/spaces/by/creator_ids", query: query)
+  end
+
+  @doc """
   Get space by ID
 
   GET /2/spaces/{id}
@@ -13,7 +64,8 @@ defmodule Xdk.Spaces do
 
   """
   @spec get_by_id(Xdk.t(), id :: String.t(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_by_id(client, id, opts \\ []) do
     query =
       [
@@ -22,7 +74,7 @@ defmodule Xdk.Spaces do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"topic.fields", Keyword.get(opts, :topic_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/spaces/{id}",
       params: %{
@@ -41,7 +93,8 @@ defmodule Xdk.Spaces do
 
   """
   @spec get_buyers(Xdk.t(), id :: String.t(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_buyers(client, id, opts \\ []) do
     query =
       [
@@ -51,7 +104,7 @@ defmodule Xdk.Spaces do
         {"expansions", Keyword.get(opts, :expansions)},
         {"tweet.fields", Keyword.get(opts, :tweet_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/spaces/{id}/buyers",
       params: %{
@@ -59,54 +112,6 @@ defmodule Xdk.Spaces do
       },
       query: query
     )
-  end
-
-  @doc """
-  Get Spaces by creator IDs
-
-  GET /2/spaces/by/creator_ids
-
-  Retrieves details of Spaces created by specified User IDs.
-
-  """
-  @spec get_by_creator_ids(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_by_creator_ids(client, opts \\ []) do
-    query =
-      [
-        {"user_ids", Keyword.get(opts, :user_ids)},
-        {"space.fields", Keyword.get(opts, :space_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"topic.fields", Keyword.get(opts, :topic_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/spaces/by/creator_ids", query: query)
-  end
-
-  @doc """
-  Search Spaces
-
-  GET /2/spaces/search
-
-  Retrieves a list of Spaces matching the specified search query.
-
-  """
-  @spec search(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def search(client, opts \\ []) do
-    query =
-      [
-        {"query", Keyword.get(opts, :query)},
-        {"state", Keyword.get(opts, :state)},
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"space.fields", Keyword.get(opts, :space_fields)},
-        {"expansions", Keyword.get(opts, :expansions)},
-        {"user.fields", Keyword.get(opts, :user_fields)},
-        {"topic.fields", Keyword.get(opts, :topic_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/spaces/search", query: query)
   end
 
   @doc """
@@ -118,7 +123,8 @@ defmodule Xdk.Spaces do
 
   """
   @spec get_posts(Xdk.t(), id :: String.t(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_posts(client, id, opts \\ []) do
     query =
       [
@@ -130,7 +136,7 @@ defmodule Xdk.Spaces do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/spaces/{id}/tweets",
       params: %{
@@ -148,7 +154,8 @@ defmodule Xdk.Spaces do
   Retrieves details of multiple Spaces by their IDs.
 
   """
-  @spec get_by_ids(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_by_ids(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_by_ids(client, opts \\ []) do
     query =
       [
@@ -158,7 +165,7 @@ defmodule Xdk.Spaces do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"topic.fields", Keyword.get(opts, :topic_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/spaces", query: query)
   end

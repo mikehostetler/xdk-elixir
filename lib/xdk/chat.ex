@@ -5,33 +5,6 @@ defmodule Xdk.Chat do
   @moduledoc "Auto-generated client for chat operations"
 
   @doc """
-  Get Chat Conversation
-
-  GET /2/chat/conversations/{conversation_id}
-
-  Retrieves messages and key change events for a specific Chat conversation with pagination support.
-
-  """
-  @spec get_conversation(Xdk.t(), conversation_id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_conversation(client, conversation_id, opts \\ []) do
-    query =
-      [
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"chat_message_event.fields", Keyword.get(opts, :chat_message_event_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/chat/conversations/{conversation_id}",
-      params: %{
-        "conversation_id" => conversation_id
-      },
-      query: query
-    )
-  end
-
-  @doc """
   Get user public keys
 
   GET /2/users/{id}/public_keys
@@ -39,14 +12,15 @@ defmodule Xdk.Chat do
   Returns the public keys and Juicebox configuration for the specified user.
 
   """
-  @spec get_user_public_keys(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+  @spec get_user_public_keys(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_user_public_keys(client, id, opts \\ []) do
     query =
       [
         {"public_key.fields", Keyword.get(opts, :public_key_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/users/{id}/public_keys",
       params: %{
@@ -64,12 +38,15 @@ defmodule Xdk.Chat do
   Registers a user's public key for X Chat encryption.
 
   """
-  @spec add_user_public_key(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def add_user_public_key(client, id) do
+  @spec add_user_public_key(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def add_user_public_key(client, id, body) do
     Xdk.request(client, :post, "/2/users/{id}/public_keys",
       params: %{
         "id" => id
-      }
+      },
+      json: body
     )
   end
 
@@ -81,12 +58,43 @@ defmodule Xdk.Chat do
   Sends an encrypted message to a specific Chat conversation.
 
   """
-  @spec send_message(Xdk.t(), conversation_id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def send_message(client, conversation_id) do
+  @spec send_message(Xdk.t(), conversation_id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def send_message(client, conversation_id, body) do
     Xdk.request(client, :post, "/2/chat/conversations/{conversation_id}/messages",
       params: %{
         "conversation_id" => conversation_id
-      }
+      },
+      json: body
+    )
+  end
+
+  @doc """
+  Get Chat Conversation
+
+  GET /2/chat/conversations/{conversation_id}
+
+  Retrieves messages and key change events for a specific Chat conversation with pagination support.
+
+  """
+  @spec get_conversation(Xdk.t(), conversation_id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_conversation(client, conversation_id, opts \\ []) do
+    query =
+      [
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"chat_message_event.fields", Keyword.get(opts, :chat_message_event_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/chat/conversations/{conversation_id}",
+      params: %{
+        "conversation_id" => conversation_id
+      },
+      query: query
     )
   end
 
@@ -98,7 +106,9 @@ defmodule Xdk.Chat do
   Retrieves a list of Chat conversations for the authenticated user's inbox.
 
   """
-  @spec get_conversations(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_conversations(Xdk.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_conversations(client, opts \\ []) do
     query =
       [
@@ -108,7 +118,7 @@ defmodule Xdk.Chat do
         {"expansions", Keyword.get(opts, :expansions)},
         {"user.fields", Keyword.get(opts, :user_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/chat/conversations", query: query)
   end

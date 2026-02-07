@@ -5,6 +5,61 @@ defmodule Xdk.CommunityNotes do
   @moduledoc "Auto-generated client for community notes operations"
 
   @doc """
+  Delete a Community Note
+
+  DELETE /2/notes/{id}
+
+  Deletes a community note.
+
+  """
+  @spec delete(Xdk.t(), id :: String.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def delete(client, id) do
+    Xdk.request(client, :delete, "/2/notes/{id}",
+      params: %{
+        "id" => id
+      }
+    )
+  end
+
+  @doc """
+  Search for Community Notes Written
+
+  GET /2/notes/search/notes_written
+
+  Returns all the community notes written by the user.
+
+  """
+  @spec search_written(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def search_written(client, opts \\ []) do
+    query =
+      [
+        {"test_mode", Keyword.get(opts, :test_mode)},
+        {"pagination_token", Keyword.get(opts, :pagination_token)},
+        {"max_results", Keyword.get(opts, :max_results)},
+        {"note.fields", Keyword.get(opts, :note_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/notes/search/notes_written", query: query)
+  end
+
+  @doc """
+  Evaluate a Community Note
+
+  POST /2/evaluate_note
+
+  Endpoint to evaluate a community note.
+
+  """
+  @spec evaluate(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def evaluate(client, body) do
+    Xdk.request(client, :post, "/2/evaluate_note", json: body)
+  end
+
+  @doc """
   Create a Community Note
 
   POST /2/notes
@@ -12,9 +67,10 @@ defmodule Xdk.CommunityNotes do
   Creates a community note endpoint for LLM use case.
 
   """
-  @spec create(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def create(client) do
-    Xdk.request(client, :post, "/2/notes")
+  @spec create(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def create(client, body) do
+    Xdk.request(client, :post, "/2/notes", json: body)
   end
 
   @doc """
@@ -26,7 +82,8 @@ defmodule Xdk.CommunityNotes do
 
   """
   @spec search_eligible_posts(Xdk.t(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def search_eligible_posts(client, opts \\ []) do
     query =
       [
@@ -41,60 +98,8 @@ defmodule Xdk.CommunityNotes do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/notes/search/posts_eligible_for_notes", query: query)
-  end
-
-  @doc """
-  Search for Community Notes Written
-
-  GET /2/notes/search/notes_written
-
-  Returns all the community notes written by the user.
-
-  """
-  @spec search_written(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def search_written(client, opts \\ []) do
-    query =
-      [
-        {"test_mode", Keyword.get(opts, :test_mode)},
-        {"pagination_token", Keyword.get(opts, :pagination_token)},
-        {"max_results", Keyword.get(opts, :max_results)},
-        {"note.fields", Keyword.get(opts, :note_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/notes/search/notes_written", query: query)
-  end
-
-  @doc """
-  Delete a Community Note
-
-  DELETE /2/notes/{id}
-
-  Deletes a community note.
-
-  """
-  @spec delete(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def delete(client, id) do
-    Xdk.request(client, :delete, "/2/notes/{id}",
-      params: %{
-        "id" => id
-      }
-    )
-  end
-
-  @doc """
-  Evaluate a Community Note
-
-  POST /2/evaluate_note
-
-  Endpoint to evaluate a community note.
-
-  """
-  @spec evaluate(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def evaluate(client) do
-    Xdk.request(client, :post, "/2/evaluate_note")
   end
 end

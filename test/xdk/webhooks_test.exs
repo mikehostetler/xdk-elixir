@@ -3,30 +3,16 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.WebhooksTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Webhooks)
     end
 
-    test "get_stream_links function exists" do
-      Code.ensure_loaded!(Xdk.Webhooks)
-      assert function_exported?(Xdk.Webhooks, :get_stream_links, 1)
-    end
-
     test "create_webhook_replay_job function exists" do
       Code.ensure_loaded!(Xdk.Webhooks)
-      assert function_exported?(Xdk.Webhooks, :create_webhook_replay_job, 1)
-    end
-
-    test "validate function exists" do
-      Code.ensure_loaded!(Xdk.Webhooks)
-      assert function_exported?(Xdk.Webhooks, :validate, 2)
-    end
-
-    test "delete function exists" do
-      Code.ensure_loaded!(Xdk.Webhooks)
-      assert function_exported?(Xdk.Webhooks, :delete, 2)
+      assert function_exported?(Xdk.Webhooks, :create_webhook_replay_job, 2)
     end
 
     test "create_stream_link function exists" do
@@ -41,6 +27,21 @@ defmodule Xdk.WebhooksTest do
       assert function_exported?(Xdk.Webhooks, :delete_stream_link, 2)
     end
 
+    test "validate function exists" do
+      Code.ensure_loaded!(Xdk.Webhooks)
+      assert function_exported?(Xdk.Webhooks, :validate, 2)
+    end
+
+    test "delete function exists" do
+      Code.ensure_loaded!(Xdk.Webhooks)
+      assert function_exported?(Xdk.Webhooks, :delete, 2)
+    end
+
+    test "get_stream_links function exists" do
+      Code.ensure_loaded!(Xdk.Webhooks)
+      assert function_exported?(Xdk.Webhooks, :get_stream_links, 1)
+    end
+
     test "get function exists" do
       Code.ensure_loaded!(Xdk.Webhooks)
 
@@ -50,7 +51,239 @@ defmodule Xdk.WebhooksTest do
 
     test "create function exists" do
       Code.ensure_loaded!(Xdk.Webhooks)
-      assert function_exported?(Xdk.Webhooks, :create, 1)
+      assert function_exported?(Xdk.Webhooks, :create, 2)
+    end
+  end
+
+  describe "create_webhook_replay_job/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/webhooks/replay", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Webhooks.create_webhook_replay_job(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/webhooks/replay", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Webhooks.create_webhook_replay_job(client, %{})
+    end
+  end
+
+  describe "create_stream_link/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/tweets/search/webhooks/test_webhook_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Webhooks.create_stream_link(client, "test_webhook_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/tweets/search/webhooks/test_webhook_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Webhooks.create_stream_link(client, "test_webhook_id")
+    end
+  end
+
+  describe "delete_stream_link/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/tweets/search/webhooks/test_webhook_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Webhooks.delete_stream_link(client, "test_webhook_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/tweets/search/webhooks/test_webhook_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Webhooks.delete_stream_link(client, "test_webhook_id")
+    end
+  end
+
+  describe "validate/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "PUT", "/2/webhooks/test_webhook_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Webhooks.validate(client, "test_webhook_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "PUT", "/2/webhooks/test_webhook_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Webhooks.validate(client, "test_webhook_id")
+    end
+  end
+
+  describe "delete/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/webhooks/test_webhook_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Webhooks.delete(client, "test_webhook_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/webhooks/test_webhook_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Webhooks.delete(client, "test_webhook_id")
+    end
+  end
+
+  describe "get_stream_links/1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/webhooks", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Webhooks.get_stream_links(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/webhooks", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Webhooks.get_stream_links(client)
+    end
+  end
+
+  describe "get/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/webhooks", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Webhooks.get(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/webhooks", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Webhooks.get(client)
+    end
+  end
+
+  describe "create/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/webhooks", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Webhooks.create(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/webhooks", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Webhooks.create(client, %{})
     end
   end
 end

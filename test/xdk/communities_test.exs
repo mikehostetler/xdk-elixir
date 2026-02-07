@@ -3,10 +3,18 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.CommunitiesTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Communities)
+    end
+
+    test "get_by_id function exists" do
+      Code.ensure_loaded!(Xdk.Communities)
+
+      assert function_exported?(Xdk.Communities, :get_by_id, 2) or
+               function_exported?(Xdk.Communities, :get_by_id, 3)
     end
 
     test "search function exists" do
@@ -15,12 +23,63 @@ defmodule Xdk.CommunitiesTest do
       assert function_exported?(Xdk.Communities, :search, 1) or
                function_exported?(Xdk.Communities, :search, 2)
     end
+  end
 
-    test "get_by_id function exists" do
-      Code.ensure_loaded!(Xdk.Communities)
+  describe "get_by_id/2+1" do
+    setup do
+      setup_client()
+    end
 
-      assert function_exported?(Xdk.Communities, :get_by_id, 2) or
-               function_exported?(Xdk.Communities, :get_by_id, 3)
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/communities/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Communities.get_by_id(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/communities/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Communities.get_by_id(client, "test_id")
+    end
+  end
+
+  describe "search/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/communities/search", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Communities.search(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/communities/search", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Communities.search(client)
     end
   end
 end

@@ -5,6 +5,27 @@ defmodule Xdk.Media do
   @moduledoc "Auto-generated client for media operations"
 
   @doc """
+  Get Media by media keys
+
+  GET /2/media
+
+  Retrieves details of Media files by their media keys.
+
+  """
+  @spec get_by_keys(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_by_keys(client, opts \\ []) do
+    query =
+      [
+        {"media_keys", Keyword.get(opts, :media_keys)},
+        {"media.fields", Keyword.get(opts, :media_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/media", query: query)
+  end
+
+  @doc """
   Get Media upload status
 
   GET /2/media/upload
@@ -12,14 +33,16 @@ defmodule Xdk.Media do
   Retrieves the status of a Media upload by its ID.
 
   """
-  @spec get_upload_status(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_upload_status(Xdk.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_upload_status(client, opts \\ []) do
     query =
       [
         {"media_id", Keyword.get(opts, :media_id)},
         {"command", Keyword.get(opts, :command)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/media/upload", query: query)
   end
@@ -32,26 +55,10 @@ defmodule Xdk.Media do
   Uploads a media file for use in posts or other content.
 
   """
-  @spec upload(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def upload(client) do
-    Xdk.request(client, :post, "/2/media/upload")
-  end
+  @spec upload(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
 
-  @doc """
-  Finalize Media upload
-
-  POST /2/media/upload/{id}/finalize
-
-  Finalizes a Media upload request.
-
-  """
-  @spec finalize_upload(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def finalize_upload(client, id) do
-    Xdk.request(client, :post, "/2/media/upload/{id}/finalize",
-      params: %{
-        "id" => id
-      }
-    )
+  def upload(client, body) do
+    Xdk.request(client, :post, "/2/media/upload", json: body)
   end
 
   @doc """
@@ -62,9 +69,10 @@ defmodule Xdk.Media do
   Creates subtitles for a specific Media file.
 
   """
-  @spec create_subtitles(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def create_subtitles(client) do
-    Xdk.request(client, :post, "/2/media/subtitles")
+  @spec create_subtitles(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def create_subtitles(client, body) do
+    Xdk.request(client, :post, "/2/media/subtitles", json: body)
   end
 
   @doc """
@@ -75,9 +83,10 @@ defmodule Xdk.Media do
   Deletes subtitles for a specific Media file.
 
   """
-  @spec delete_subtitles(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def delete_subtitles(client) do
-    Xdk.request(client, :delete, "/2/media/subtitles")
+  @spec delete_subtitles(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def delete_subtitles(client, body) do
+    Xdk.request(client, :delete, "/2/media/subtitles", json: body)
   end
 
   @doc """
@@ -88,12 +97,15 @@ defmodule Xdk.Media do
   Appends data to a Media upload request.
 
   """
-  @spec append_upload(Xdk.t(), id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def append_upload(client, id) do
+  @spec append_upload(Xdk.t(), id :: String.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def append_upload(client, id, body) do
     Xdk.request(client, :post, "/2/media/upload/{id}/append",
       params: %{
         "id" => id
-      }
+      },
+      json: body
     )
   end
 
@@ -105,9 +117,10 @@ defmodule Xdk.Media do
   Initializes a media upload.
 
   """
-  @spec initialize_upload(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def initialize_upload(client) do
-    Xdk.request(client, :post, "/2/media/upload/initialize")
+  @spec initialize_upload(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def initialize_upload(client, body) do
+    Xdk.request(client, :post, "/2/media/upload/initialize", json: body)
   end
 
   @doc """
@@ -118,14 +131,15 @@ defmodule Xdk.Media do
   Retrieves details of a specific Media file by its media key.
 
   """
-  @spec get_by_key(Xdk.t(), media_key :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+  @spec get_by_key(Xdk.t(), media_key :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_by_key(client, media_key, opts \\ []) do
     query =
       [
         {"media.fields", Keyword.get(opts, :media_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/media/{media_key}",
       params: %{
@@ -136,23 +150,45 @@ defmodule Xdk.Media do
   end
 
   @doc """
-  Get Media by media keys
+  Get Media analytics
 
-  GET /2/media
+  GET /2/media/analytics
 
-  Retrieves details of Media files by their media keys.
+  Retrieves analytics data for media.
 
   """
-  @spec get_by_keys(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_by_keys(client, opts \\ []) do
+  @spec get_analytics(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_analytics(client, opts \\ []) do
     query =
       [
         {"media_keys", Keyword.get(opts, :media_keys)},
-        {"media.fields", Keyword.get(opts, :media_fields)}
+        {"end_time", Keyword.get(opts, :end_time)},
+        {"start_time", Keyword.get(opts, :start_time)},
+        {"granularity", Keyword.get(opts, :granularity)},
+        {"media_analytics.fields", Keyword.get(opts, :media_analytics_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
-    Xdk.request(client, :get, "/2/media", query: query)
+    Xdk.request(client, :get, "/2/media/analytics", query: query)
+  end
+
+  @doc """
+  Finalize Media upload
+
+  POST /2/media/upload/{id}/finalize
+
+  Finalizes a Media upload request.
+
+  """
+  @spec finalize_upload(Xdk.t(), id :: String.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def finalize_upload(client, id) do
+    Xdk.request(client, :post, "/2/media/upload/{id}/finalize",
+      params: %{
+        "id" => id
+      }
+    )
   end
 
   @doc """
@@ -163,31 +199,9 @@ defmodule Xdk.Media do
   Creates metadata for a Media file.
 
   """
-  @spec create_metadata(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def create_metadata(client) do
-    Xdk.request(client, :post, "/2/media/metadata")
-  end
+  @spec create_metadata(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
 
-  @doc """
-  Get Media analytics
-
-  GET /2/media/analytics
-
-  Retrieves analytics data for media.
-
-  """
-  @spec get_analytics(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_analytics(client, opts \\ []) do
-    query =
-      [
-        {"media_keys", Keyword.get(opts, :media_keys)},
-        {"end_time", Keyword.get(opts, :end_time)},
-        {"start_time", Keyword.get(opts, :start_time)},
-        {"granularity", Keyword.get(opts, :granularity)},
-        {"media_analytics.fields", Keyword.get(opts, :media_analytics_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/media/analytics", query: query)
+  def create_metadata(client, body) do
+    Xdk.request(client, :post, "/2/media/metadata", json: body)
   end
 end

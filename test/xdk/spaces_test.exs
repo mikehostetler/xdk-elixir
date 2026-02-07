@@ -3,10 +3,25 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.SpacesTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Spaces)
+    end
+
+    test "search function exists" do
+      Code.ensure_loaded!(Xdk.Spaces)
+
+      assert function_exported?(Xdk.Spaces, :search, 1) or
+               function_exported?(Xdk.Spaces, :search, 2)
+    end
+
+    test "get_by_creator_ids function exists" do
+      Code.ensure_loaded!(Xdk.Spaces)
+
+      assert function_exported?(Xdk.Spaces, :get_by_creator_ids, 1) or
+               function_exported?(Xdk.Spaces, :get_by_creator_ids, 2)
     end
 
     test "get_by_id function exists" do
@@ -23,20 +38,6 @@ defmodule Xdk.SpacesTest do
                function_exported?(Xdk.Spaces, :get_buyers, 3)
     end
 
-    test "get_by_creator_ids function exists" do
-      Code.ensure_loaded!(Xdk.Spaces)
-
-      assert function_exported?(Xdk.Spaces, :get_by_creator_ids, 1) or
-               function_exported?(Xdk.Spaces, :get_by_creator_ids, 2)
-    end
-
-    test "search function exists" do
-      Code.ensure_loaded!(Xdk.Spaces)
-
-      assert function_exported?(Xdk.Spaces, :search, 1) or
-               function_exported?(Xdk.Spaces, :search, 2)
-    end
-
     test "get_posts function exists" do
       Code.ensure_loaded!(Xdk.Spaces)
 
@@ -49,6 +50,180 @@ defmodule Xdk.SpacesTest do
 
       assert function_exported?(Xdk.Spaces, :get_by_ids, 1) or
                function_exported?(Xdk.Spaces, :get_by_ids, 2)
+    end
+  end
+
+  describe "search/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/search", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Spaces.search(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/search", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Spaces.search(client)
+    end
+  end
+
+  describe "get_by_creator_ids/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/by/creator_ids", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Spaces.get_by_creator_ids(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/by/creator_ids", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Spaces.get_by_creator_ids(client)
+    end
+  end
+
+  describe "get_by_id/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Spaces.get_by_id(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Spaces.get_by_id(client, "test_id")
+    end
+  end
+
+  describe "get_buyers/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/test_id/buyers", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Spaces.get_buyers(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/test_id/buyers", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Spaces.get_buyers(client, "test_id")
+    end
+  end
+
+  describe "get_posts/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/test_id/tweets", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Spaces.get_posts(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces/test_id/tweets", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Spaces.get_posts(client, "test_id")
+    end
+  end
+
+  describe "get_by_ids/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Spaces.get_by_ids(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/spaces", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Spaces.get_by_ids(client)
     end
   end
 end

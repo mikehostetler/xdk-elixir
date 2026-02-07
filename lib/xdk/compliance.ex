@@ -12,7 +12,8 @@ defmodule Xdk.Compliance do
   Retrieves a list of Compliance Jobs filtered by job type and optional status.
 
   """
-  @spec get_jobs(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_jobs(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_jobs(client, opts \\ []) do
     query =
       [
@@ -20,7 +21,7 @@ defmodule Xdk.Compliance do
         {"status", Keyword.get(opts, :status)},
         {"compliance_job.fields", Keyword.get(opts, :compliance_job_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/compliance/jobs", query: query)
   end
@@ -33,9 +34,10 @@ defmodule Xdk.Compliance do
   Creates a new Compliance Job for the specified job type.
 
   """
-  @spec create_jobs(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def create_jobs(client) do
-    Xdk.request(client, :post, "/2/compliance/jobs")
+  @spec create_jobs(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def create_jobs(client, body) do
+    Xdk.request(client, :post, "/2/compliance/jobs", json: body)
   end
 
   @doc """
@@ -46,14 +48,15 @@ defmodule Xdk.Compliance do
   Retrieves details of a specific Compliance Job by its ID.
 
   """
-  @spec get_jobs_by_id(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+  @spec get_jobs_by_id(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_jobs_by_id(client, id, opts \\ []) do
     query =
       [
         {"compliance_job.fields", Keyword.get(opts, :compliance_job_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/compliance/jobs/{id}",
       params: %{

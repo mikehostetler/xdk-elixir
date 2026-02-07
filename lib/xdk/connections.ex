@@ -5,37 +5,6 @@ defmodule Xdk.Connections do
   @moduledoc "Auto-generated client for connections operations"
 
   @doc """
-  Terminate all connections
-
-  DELETE /2/connections/all
-
-  Terminates all active streaming connections for the authenticated application.
-
-  """
-  @spec delete_all(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def delete_all(client) do
-    Xdk.request(client, :delete, "/2/connections/all")
-  end
-
-  @doc """
-  Terminate connections by endpoint
-
-  DELETE /2/connections/{endpoint_id}
-
-  Terminates all streaming connections for a specific endpoint ID for the authenticated application.
-
-  """
-  @spec delete_by_endpoint(Xdk.t(), endpoint_id :: String.t()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def delete_by_endpoint(client, endpoint_id) do
-    Xdk.request(client, :delete, "/2/connections/{endpoint_id}",
-      params: %{
-        "endpoint_id" => endpoint_id
-      }
-    )
-  end
-
-  @doc """
   Get Connection History
 
   GET /2/connections
@@ -44,7 +13,8 @@ defmodule Xdk.Connections do
 
   """
   @spec get_connection_history(Xdk.t(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_connection_history(client, opts \\ []) do
     query =
       [
@@ -54,7 +24,7 @@ defmodule Xdk.Connections do
         {"pagination_token", Keyword.get(opts, :pagination_token)},
         {"connection.fields", Keyword.get(opts, :connection_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/connections", query: query)
   end
@@ -67,8 +37,42 @@ defmodule Xdk.Connections do
   Terminates multiple streaming connections by their UUIDs for the authenticated application.
 
   """
-  @spec delete_by_uuids(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def delete_by_uuids(client) do
-    Xdk.request(client, :delete, "/2/connections")
+  @spec delete_by_uuids(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def delete_by_uuids(client, body) do
+    Xdk.request(client, :delete, "/2/connections", json: body)
+  end
+
+  @doc """
+  Terminate connections by endpoint
+
+  DELETE /2/connections/{endpoint_id}
+
+  Terminates all streaming connections for a specific endpoint ID for the authenticated application.
+
+  """
+  @spec delete_by_endpoint(Xdk.t(), endpoint_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def delete_by_endpoint(client, endpoint_id) do
+    Xdk.request(client, :delete, "/2/connections/{endpoint_id}",
+      params: %{
+        "endpoint_id" => endpoint_id
+      }
+    )
+  end
+
+  @doc """
+  Terminate all connections
+
+  DELETE /2/connections/all
+
+  Terminates all active streaming connections for the authenticated application.
+
+  """
+  @spec delete_all(Xdk.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def delete_all(client) do
+    Xdk.request(client, :delete, "/2/connections/all")
   end
 end

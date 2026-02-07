@@ -12,13 +12,15 @@ defmodule Xdk.Trends do
   Retrieves personalized trending topics for the authenticated user.
 
   """
-  @spec get_personalized(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_personalized(Xdk.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_personalized(client, opts \\ []) do
     query =
       [
         {"personalized_trend.fields", Keyword.get(opts, :personalized_trend_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/users/personalized_trends", query: query)
   end
@@ -32,14 +34,15 @@ defmodule Xdk.Trends do
 
   """
   @spec get_by_woeid(Xdk.t(), woeid :: integer(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_by_woeid(client, woeid, opts \\ []) do
     query =
       [
         {"max_trends", Keyword.get(opts, :max_trends)},
         {"trend.fields", Keyword.get(opts, :trend_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/trends/by/woeid/{woeid}",
       params: %{

@@ -12,14 +12,15 @@ defmodule Xdk.Usage do
   Retrieves usage statistics for Posts over a specified number of days.
 
   """
-  @spec get(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get(client, opts \\ []) do
     query =
       [
         {"days", Keyword.get(opts, :days)},
         {"usage.fields", Keyword.get(opts, :usage_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/usage/tweets", query: query)
   end

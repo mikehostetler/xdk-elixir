@@ -3,6 +3,7 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.DirectMessagesTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
@@ -16,11 +17,9 @@ defmodule Xdk.DirectMessagesTest do
                function_exported?(Xdk.DirectMessages, :get_events, 2)
     end
 
-    test "get_events_by_conversation_id function exists" do
+    test "create_by_participant_id function exists" do
       Code.ensure_loaded!(Xdk.DirectMessages)
-
-      assert function_exported?(Xdk.DirectMessages, :get_events_by_conversation_id, 2) or
-               function_exported?(Xdk.DirectMessages, :get_events_by_conversation_id, 3)
+      assert function_exported?(Xdk.DirectMessages, :create_by_participant_id, 3)
     end
 
     test "get_events_by_id function exists" do
@@ -35,14 +34,21 @@ defmodule Xdk.DirectMessagesTest do
       assert function_exported?(Xdk.DirectMessages, :delete_events, 2)
     end
 
-    test "create_conversation function exists" do
+    test "create_by_conversation_id function exists" do
       Code.ensure_loaded!(Xdk.DirectMessages)
-      assert function_exported?(Xdk.DirectMessages, :create_conversation, 1)
+      assert function_exported?(Xdk.DirectMessages, :create_by_conversation_id, 3)
     end
 
-    test "create_by_participant_id function exists" do
+    test "get_events_by_conversation_id function exists" do
       Code.ensure_loaded!(Xdk.DirectMessages)
-      assert function_exported?(Xdk.DirectMessages, :create_by_participant_id, 2)
+
+      assert function_exported?(Xdk.DirectMessages, :get_events_by_conversation_id, 2) or
+               function_exported?(Xdk.DirectMessages, :get_events_by_conversation_id, 3)
+    end
+
+    test "create_conversation function exists" do
+      Code.ensure_loaded!(Xdk.DirectMessages)
+      assert function_exported?(Xdk.DirectMessages, :create_conversation, 2)
     end
 
     test "get_events_by_participant_id function exists" do
@@ -51,10 +57,271 @@ defmodule Xdk.DirectMessagesTest do
       assert function_exported?(Xdk.DirectMessages, :get_events_by_participant_id, 2) or
                function_exported?(Xdk.DirectMessages, :get_events_by_participant_id, 3)
     end
+  end
 
-    test "create_by_conversation_id function exists" do
-      Code.ensure_loaded!(Xdk.DirectMessages)
-      assert function_exported?(Xdk.DirectMessages, :create_by_conversation_id, 2)
+  describe "get_events/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/dm_events", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.DirectMessages.get_events(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/dm_events", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.DirectMessages.get_events(client)
+    end
+  end
+
+  describe "create_by_participant_id/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "POST",
+        "/2/dm_conversations/with/test_participant_id/messages",
+        fn conn ->
+          assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(200, ~s({"data":{}}))
+        end
+      )
+
+      Xdk.DirectMessages.create_by_participant_id(client, "test_participant_id", %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "POST",
+        "/2/dm_conversations/with/test_participant_id/messages",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+        end
+      )
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.DirectMessages.create_by_participant_id(client, "test_participant_id", %{})
+    end
+  end
+
+  describe "get_events_by_id/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/dm_events/test_event_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.DirectMessages.get_events_by_id(client, "test_event_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/dm_events/test_event_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.DirectMessages.get_events_by_id(client, "test_event_id")
+    end
+  end
+
+  describe "delete_events/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/dm_events/test_event_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.DirectMessages.delete_events(client, "test_event_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/dm_events/test_event_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.DirectMessages.delete_events(client, "test_event_id")
+    end
+  end
+
+  describe "create_by_conversation_id/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "POST",
+        "/2/dm_conversations/test_dm_conversation_id/messages",
+        fn conn ->
+          assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(200, ~s({"data":{}}))
+        end
+      )
+
+      Xdk.DirectMessages.create_by_conversation_id(client, "test_dm_conversation_id", %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "POST",
+        "/2/dm_conversations/test_dm_conversation_id/messages",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+        end
+      )
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.DirectMessages.create_by_conversation_id(
+                 client,
+                 "test_dm_conversation_id",
+                 %{}
+               )
+    end
+  end
+
+  describe "get_events_by_conversation_id/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/dm_conversations/test_id/dm_events", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.DirectMessages.get_events_by_conversation_id(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/dm_conversations/test_id/dm_events", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.DirectMessages.get_events_by_conversation_id(client, "test_id")
+    end
+  end
+
+  describe "create_conversation/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/dm_conversations", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.DirectMessages.create_conversation(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/dm_conversations", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.DirectMessages.create_conversation(client, %{})
+    end
+  end
+
+  describe "get_events_by_participant_id/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "GET",
+        "/2/dm_conversations/with/test_participant_id/dm_events",
+        fn conn ->
+          assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(200, ~s({"data":{}}))
+        end
+      )
+
+      Xdk.DirectMessages.get_events_by_participant_id(client, "test_participant_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(
+        bypass,
+        "GET",
+        "/2/dm_conversations/with/test_participant_id/dm_events",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+        end
+      )
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.DirectMessages.get_events_by_participant_id(client, "test_participant_id")
     end
   end
 end

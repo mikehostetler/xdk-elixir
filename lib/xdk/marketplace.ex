@@ -13,14 +13,15 @@ defmodule Xdk.Marketplace do
 
   """
   @spec get_handle_availability(Xdk.t(), handle :: String.t(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_handle_availability(client, handle, opts \\ []) do
     query =
       [
         {"marketplace_handle_availability.fields",
          Keyword.get(opts, :marketplace_handle_availability_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/marketplace/handles/{handle}/availability",
       params: %{

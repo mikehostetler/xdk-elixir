@@ -5,6 +5,32 @@ defmodule Xdk.Communities do
   @moduledoc "Auto-generated client for communities operations"
 
   @doc """
+  Get Community by ID
+
+  GET /2/communities/{id}
+
+  Retrieves details of a specific Community by its ID.
+
+  """
+  @spec get_by_id(Xdk.t(), id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_by_id(client, id, opts \\ []) do
+    query =
+      [
+        {"community.fields", Keyword.get(opts, :community_fields)}
+      ]
+      |> Xdk.Query.build()
+
+    Xdk.request(client, :get, "/2/communities/{id}",
+      params: %{
+        "id" => id
+      },
+      query: query
+    )
+  end
+
+  @doc """
   Search Communities
 
   GET /2/communities/search
@@ -12,7 +38,8 @@ defmodule Xdk.Communities do
   Retrieves a list of Communities matching the specified search query.
 
   """
-  @spec search(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec search(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def search(client, opts \\ []) do
     query =
       [
@@ -22,33 +49,8 @@ defmodule Xdk.Communities do
         {"pagination_token", Keyword.get(opts, :pagination_token)},
         {"community.fields", Keyword.get(opts, :community_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/communities/search", query: query)
-  end
-
-  @doc """
-  Get Community by ID
-
-  GET /2/communities/{id}
-
-  Retrieves details of a specific Community by its ID.
-
-  """
-  @spec get_by_id(Xdk.t(), id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
-  def get_by_id(client, id, opts \\ []) do
-    query =
-      [
-        {"community.fields", Keyword.get(opts, :community_fields)}
-      ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
-
-    Xdk.request(client, :get, "/2/communities/{id}",
-      params: %{
-        "id" => id
-      },
-      query: query
-    )
   end
 end

@@ -12,7 +12,8 @@ defmodule Xdk.General do
   Retrieves the full OpenAPI Specification in JSON format. (See https://github.com/OAI/OpenAPI-Specification/blob/master/README.md)
 
   """
-  @spec get_open_api_spec(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get_open_api_spec(Xdk.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get_open_api_spec(client) do
     Xdk.request(client, :get, "/2/openapi.json")
   end

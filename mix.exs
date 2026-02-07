@@ -16,8 +16,7 @@ defmodule Xdk.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
-      mod: {Xdk.Application, []}
+      extra_applications: [:logger]
     ]
   end
 
@@ -26,7 +25,7 @@ defmodule Xdk.MixProject do
       {:finch, "~> 0.19"},
       {:jason, "~> 1.4"},
       {:splode, "~> 0.2"},
-      {:zoi, "~> 0.17"}
+      {:bypass, "~> 2.1", only: :test}
     ]
   end
 end

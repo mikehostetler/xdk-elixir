@@ -6,9 +6,16 @@ defmodule Xdk.Errors do
     error_classes: [
       api: Xdk.Errors.Api,
       transport: Xdk.Errors.Transport,
-      unknown: Xdk.Errors.Unknown
+      decode: Xdk.Errors.Decode
     ],
-    unknown_error: Xdk.Errors.Unknown.UnknownError
+    unknown_error: Xdk.Errors.UnknownError
+
+  @type error ::
+          Xdk.Errors.ApiError.t()
+          | Xdk.Errors.RateLimitError.t()
+          | Xdk.Errors.TransportError.t()
+          | Xdk.Errors.DecodeError.t()
+          | Xdk.Errors.UnknownError.t()
 end
 
 defmodule Xdk.Errors.Api do
@@ -19,27 +26,25 @@ defmodule Xdk.Errors.Transport do
   use Splode.ErrorClass, class: :transport
 end
 
-defmodule Xdk.Errors.Unknown do
-  use Splode.ErrorClass, class: :unknown
-end
-
-defmodule Xdk.Errors.Unknown.UnknownError do
-  use Splode.Error, fields: [:error], class: :unknown
-
-  def message(%{error: error}) do
-    if is_binary(error) do
-      error
-    else
-      inspect(error)
-    end
-  end
+defmodule Xdk.Errors.Decode do
+  use Splode.ErrorClass, class: :decode
 end
 
 defmodule Xdk.Errors.ApiError do
-  use Splode.Error, fields: [:status, :body], class: :api
+  use Splode.Error, fields: [:status, :body, :headers], class: :api
 
   def message(%{status: status, body: body}) do
     "X API error (HTTP #{status}): #{inspect(body)}"
+  end
+end
+
+defmodule Xdk.Errors.RateLimitError do
+  use Splode.Error,
+    fields: [:status, :body, :headers, :limit, :remaining, :reset, :retry_after_ms],
+    class: :api
+
+  def message(%{status: status, retry_after_ms: ms}) do
+    "X API rate limit exceeded (HTTP #{status}), retry after #{ms}ms"
   end
 end
 
@@ -48,5 +53,21 @@ defmodule Xdk.Errors.TransportError do
 
   def message(%{reason: reason}) do
     "Transport error: #{inspect(reason)}"
+  end
+end
+
+defmodule Xdk.Errors.DecodeError do
+  use Splode.Error, fields: [:error, :raw_body], class: :decode
+
+  def message(%{error: error}) do
+    "JSON decode error: #{inspect(error)}"
+  end
+end
+
+defmodule Xdk.Errors.UnknownError do
+  use Splode.Error, fields: [:error], class: :decode
+
+  def message(%{error: error}) do
+    if is_binary(error), do: error, else: inspect(error)
   end
 end

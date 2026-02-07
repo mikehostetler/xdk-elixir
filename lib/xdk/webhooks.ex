@@ -5,19 +5,6 @@ defmodule Xdk.Webhooks do
   @moduledoc "Auto-generated client for webhooks operations"
 
   @doc """
-  Get stream links
-
-  GET /2/tweets/search/webhooks
-
-  Get a list of webhook links associated with a filtered stream ruleset.
-
-  """
-  @spec get_stream_links(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def get_stream_links(client) do
-    Xdk.request(client, :get, "/2/tweets/search/webhooks")
-  end
-
-  @doc """
   Create replay job for webhook
 
   POST /2/webhooks/replay
@@ -25,43 +12,11 @@ defmodule Xdk.Webhooks do
   Creates a replay job to retrieve events from up to the past 24 hours for all events delivered or attempted to be delivered to the webhook.
 
   """
-  @spec create_webhook_replay_job(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def create_webhook_replay_job(client) do
-    Xdk.request(client, :post, "/2/webhooks/replay")
-  end
+  @spec create_webhook_replay_job(Xdk.t(), body :: map()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
 
-  @doc """
-  Validate webhook
-
-  PUT /2/webhooks/{webhook_id}
-
-  Triggers a CRC check for a given webhook.
-
-  """
-  @spec validate(Xdk.t(), webhook_id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def validate(client, webhook_id) do
-    Xdk.request(client, :put, "/2/webhooks/{webhook_id}",
-      params: %{
-        "webhook_id" => webhook_id
-      }
-    )
-  end
-
-  @doc """
-  Delete webhook
-
-  DELETE /2/webhooks/{webhook_id}
-
-  Deletes an existing webhook configuration.
-
-  """
-  @spec delete(Xdk.t(), webhook_id :: any()) :: {:ok, map()} | {:error, Exception.t()}
-  def delete(client, webhook_id) do
-    Xdk.request(client, :delete, "/2/webhooks/{webhook_id}",
-      params: %{
-        "webhook_id" => webhook_id
-      }
-    )
+  def create_webhook_replay_job(client, body) do
+    Xdk.request(client, :post, "/2/webhooks/replay", json: body)
   end
 
   @doc """
@@ -72,8 +27,9 @@ defmodule Xdk.Webhooks do
   Creates a link to deliver FilteredStream events to the given webhook.
 
   """
-  @spec create_stream_link(Xdk.t(), webhook_id :: any(), opts :: keyword()) ::
-          {:ok, map()} | {:error, Exception.t()}
+  @spec create_stream_link(Xdk.t(), webhook_id :: String.t(), opts :: keyword()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def create_stream_link(client, webhook_id, opts \\ []) do
     query =
       [
@@ -84,7 +40,7 @@ defmodule Xdk.Webhooks do
         {"user.fields", Keyword.get(opts, :user_fields)},
         {"place.fields", Keyword.get(opts, :place_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :post, "/2/tweets/search/webhooks/{webhook_id}",
       params: %{
@@ -102,13 +58,65 @@ defmodule Xdk.Webhooks do
   Deletes a link from FilteredStream events to the given webhook.
 
   """
-  @spec delete_stream_link(Xdk.t(), webhook_id :: any()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec delete_stream_link(Xdk.t(), webhook_id :: String.t()) ::
+          {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def delete_stream_link(client, webhook_id) do
     Xdk.request(client, :delete, "/2/tweets/search/webhooks/{webhook_id}",
       params: %{
         "webhook_id" => webhook_id
       }
     )
+  end
+
+  @doc """
+  Validate webhook
+
+  PUT /2/webhooks/{webhook_id}
+
+  Triggers a CRC check for a given webhook.
+
+  """
+  @spec validate(Xdk.t(), webhook_id :: String.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def validate(client, webhook_id) do
+    Xdk.request(client, :put, "/2/webhooks/{webhook_id}",
+      params: %{
+        "webhook_id" => webhook_id
+      }
+    )
+  end
+
+  @doc """
+  Delete webhook
+
+  DELETE /2/webhooks/{webhook_id}
+
+  Deletes an existing webhook configuration.
+
+  """
+  @spec delete(Xdk.t(), webhook_id :: String.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def delete(client, webhook_id) do
+    Xdk.request(client, :delete, "/2/webhooks/{webhook_id}",
+      params: %{
+        "webhook_id" => webhook_id
+      }
+    )
+  end
+
+  @doc """
+  Get stream links
+
+  GET /2/tweets/search/webhooks
+
+  Get a list of webhook links associated with a filtered stream ruleset.
+
+  """
+  @spec get_stream_links(Xdk.t()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def get_stream_links(client) do
+    Xdk.request(client, :get, "/2/tweets/search/webhooks")
   end
 
   @doc """
@@ -119,13 +127,14 @@ defmodule Xdk.Webhooks do
   Get a list of webhook configs associated with a client app.
 
   """
-  @spec get(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Exception.t()}
+  @spec get(Xdk.t(), opts :: keyword()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
   def get(client, opts \\ []) do
     query =
       [
         {"webhook_config.fields", Keyword.get(opts, :webhook_config_fields)}
       ]
-      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Xdk.Query.build()
 
     Xdk.request(client, :get, "/2/webhooks", query: query)
   end
@@ -138,8 +147,9 @@ defmodule Xdk.Webhooks do
   Creates a new webhook configuration.
 
   """
-  @spec create(Xdk.t()) :: {:ok, map()} | {:error, Exception.t()}
-  def create(client) do
-    Xdk.request(client, :post, "/2/webhooks")
+  @spec create(Xdk.t(), body :: map()) :: {:ok, map()} | {:error, Xdk.Errors.error()}
+
+  def create(client, body) do
+    Xdk.request(client, :post, "/2/webhooks", json: body)
   end
 end

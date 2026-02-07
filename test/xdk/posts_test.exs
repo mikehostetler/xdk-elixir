@@ -3,36 +3,32 @@
 # Any manual changes will be overwritten on the next generation.
 defmodule Xdk.PostsTest do
   use ExUnit.Case, async: true
+  import Xdk.TestHelper
 
   describe "module structure" do
     test "module exists" do
       assert Code.ensure_loaded?(Xdk.Posts)
     end
 
-    test "get_quoted function exists" do
+    test "search_all function exists" do
       Code.ensure_loaded!(Xdk.Posts)
 
-      assert function_exported?(Xdk.Posts, :get_quoted, 2) or
-               function_exported?(Xdk.Posts, :get_quoted, 3)
+      assert function_exported?(Xdk.Posts, :search_all, 1) or
+               function_exported?(Xdk.Posts, :search_all, 2)
     end
 
-    test "get_insights28hr function exists" do
+    test "get_reposts function exists" do
       Code.ensure_loaded!(Xdk.Posts)
 
-      assert function_exported?(Xdk.Posts, :get_insights28hr, 1) or
-               function_exported?(Xdk.Posts, :get_insights28hr, 2)
+      assert function_exported?(Xdk.Posts, :get_reposts, 2) or
+               function_exported?(Xdk.Posts, :get_reposts, 3)
     end
 
-    test "get_counts_recent function exists" do
+    test "get_liking_users function exists" do
       Code.ensure_loaded!(Xdk.Posts)
 
-      assert function_exported?(Xdk.Posts, :get_counts_recent, 1) or
-               function_exported?(Xdk.Posts, :get_counts_recent, 2)
-    end
-
-    test "hide_reply function exists" do
-      Code.ensure_loaded!(Xdk.Posts)
-      assert function_exported?(Xdk.Posts, :hide_reply, 2)
+      assert function_exported?(Xdk.Posts, :get_liking_users, 2) or
+               function_exported?(Xdk.Posts, :get_liking_users, 3)
     end
 
     test "get_by_id function exists" do
@@ -47,11 +43,11 @@ defmodule Xdk.PostsTest do
       assert function_exported?(Xdk.Posts, :delete, 2)
     end
 
-    test "search_all function exists" do
+    test "get_insights_historical function exists" do
       Code.ensure_loaded!(Xdk.Posts)
 
-      assert function_exported?(Xdk.Posts, :search_all, 1) or
-               function_exported?(Xdk.Posts, :search_all, 2)
+      assert function_exported?(Xdk.Posts, :get_insights_historical, 1) or
+               function_exported?(Xdk.Posts, :get_insights_historical, 2)
     end
 
     test "get_reposted_by function exists" do
@@ -59,6 +55,34 @@ defmodule Xdk.PostsTest do
 
       assert function_exported?(Xdk.Posts, :get_reposted_by, 2) or
                function_exported?(Xdk.Posts, :get_reposted_by, 3)
+    end
+
+    test "get_analytics function exists" do
+      Code.ensure_loaded!(Xdk.Posts)
+
+      assert function_exported?(Xdk.Posts, :get_analytics, 1) or
+               function_exported?(Xdk.Posts, :get_analytics, 2)
+    end
+
+    test "get_counts_recent function exists" do
+      Code.ensure_loaded!(Xdk.Posts)
+
+      assert function_exported?(Xdk.Posts, :get_counts_recent, 1) or
+               function_exported?(Xdk.Posts, :get_counts_recent, 2)
+    end
+
+    test "search_recent function exists" do
+      Code.ensure_loaded!(Xdk.Posts)
+
+      assert function_exported?(Xdk.Posts, :search_recent, 1) or
+               function_exported?(Xdk.Posts, :search_recent, 2)
+    end
+
+    test "get_quoted function exists" do
+      Code.ensure_loaded!(Xdk.Posts)
+
+      assert function_exported?(Xdk.Posts, :get_quoted, 2) or
+               function_exported?(Xdk.Posts, :get_quoted, 3)
     end
 
     test "get_by_ids function exists" do
@@ -70,14 +94,19 @@ defmodule Xdk.PostsTest do
 
     test "create function exists" do
       Code.ensure_loaded!(Xdk.Posts)
-      assert function_exported?(Xdk.Posts, :create, 1)
+      assert function_exported?(Xdk.Posts, :create, 2)
     end
 
-    test "search_recent function exists" do
+    test "hide_reply function exists" do
+      Code.ensure_loaded!(Xdk.Posts)
+      assert function_exported?(Xdk.Posts, :hide_reply, 3)
+    end
+
+    test "get_insights28hr function exists" do
       Code.ensure_loaded!(Xdk.Posts)
 
-      assert function_exported?(Xdk.Posts, :search_recent, 1) or
-               function_exported?(Xdk.Posts, :search_recent, 2)
+      assert function_exported?(Xdk.Posts, :get_insights28hr, 1) or
+               function_exported?(Xdk.Posts, :get_insights28hr, 2)
     end
 
     test "get_counts_all function exists" do
@@ -86,33 +115,469 @@ defmodule Xdk.PostsTest do
       assert function_exported?(Xdk.Posts, :get_counts_all, 1) or
                function_exported?(Xdk.Posts, :get_counts_all, 2)
     end
+  end
 
-    test "get_liking_users function exists" do
-      Code.ensure_loaded!(Xdk.Posts)
-
-      assert function_exported?(Xdk.Posts, :get_liking_users, 2) or
-               function_exported?(Xdk.Posts, :get_liking_users, 3)
+  describe "search_all/1+1" do
+    setup do
+      setup_client()
     end
 
-    test "get_insights_historical function exists" do
-      Code.ensure_loaded!(Xdk.Posts)
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/all", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
 
-      assert function_exported?(Xdk.Posts, :get_insights_historical, 1) or
-               function_exported?(Xdk.Posts, :get_insights_historical, 2)
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.search_all(client)
     end
 
-    test "get_analytics function exists" do
-      Code.ensure_loaded!(Xdk.Posts)
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/all", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
 
-      assert function_exported?(Xdk.Posts, :get_analytics, 1) or
-               function_exported?(Xdk.Posts, :get_analytics, 2)
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.search_all(client)
+    end
+  end
+
+  describe "get_reposts/2+1" do
+    setup do
+      setup_client()
     end
 
-    test "get_reposts function exists" do
-      Code.ensure_loaded!(Xdk.Posts)
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id/retweets", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
 
-      assert function_exported?(Xdk.Posts, :get_reposts, 2) or
-               function_exported?(Xdk.Posts, :get_reposts, 3)
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_reposts(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id/retweets", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_reposts(client, "test_id")
+    end
+  end
+
+  describe "get_liking_users/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id/liking_users", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_liking_users(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id/liking_users", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_liking_users(client, "test_id")
+    end
+  end
+
+  describe "get_by_id/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_by_id(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_by_id(client, "test_id")
+    end
+  end
+
+  describe "delete/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/tweets/test_id", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.delete(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "DELETE", "/2/tweets/test_id", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.delete(client, "test_id")
+    end
+  end
+
+  describe "get_insights_historical/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/insights/historical", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_insights_historical(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/insights/historical", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_insights_historical(client)
+    end
+  end
+
+  describe "get_reposted_by/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id/retweeted_by", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_reposted_by(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id/retweeted_by", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_reposted_by(client, "test_id")
+    end
+  end
+
+  describe "get_analytics/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/analytics", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_analytics(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/analytics", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_analytics(client)
+    end
+  end
+
+  describe "get_counts_recent/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/counts/recent", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_counts_recent(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/counts/recent", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_counts_recent(client)
+    end
+  end
+
+  describe "search_recent/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/recent", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.search_recent(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/search/recent", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.search_recent(client)
+    end
+  end
+
+  describe "get_quoted/2+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id/quote_tweets", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_quoted(client, "test_id")
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/test_id/quote_tweets", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_quoted(client, "test_id")
+    end
+  end
+
+  describe "get_by_ids/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_by_ids(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_by_ids(client)
+    end
+  end
+
+  describe "create/2" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/tweets", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.create(client, %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "POST", "/2/tweets", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.create(client, %{})
+    end
+  end
+
+  describe "hide_reply/3" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "PUT", "/2/tweets/test_tweet_id/hidden", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.hide_reply(client, "test_tweet_id", %{})
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "PUT", "/2/tweets/test_tweet_id/hidden", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.hide_reply(client, "test_tweet_id", %{})
+    end
+  end
+
+  describe "get_insights28hr/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/insights/28hr", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_insights28hr(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/insights/28hr", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_insights28hr(client)
+    end
+  end
+
+  describe "get_counts_all/1+1" do
+    setup do
+      setup_client()
+    end
+
+    test "sends request with auth header", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/counts/all", fn conn ->
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer test-token"]
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, ~s({"data":{}}))
+      end)
+
+      Xdk.Posts.get_counts_all(client)
+    end
+
+    test "returns error for non-2xx", %{bypass: bypass, client: client} do
+      Bypass.expect_once(bypass, "GET", "/2/tweets/counts/all", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(404, ~s({"errors":[{"message":"Not Found"}]}))
+      end)
+
+      assert {:error, %Xdk.Errors.ApiError{status: 404}} =
+               Xdk.Posts.get_counts_all(client)
     end
   end
 end
